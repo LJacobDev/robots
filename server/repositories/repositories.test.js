@@ -180,9 +180,7 @@ describe('robotRepository', () => {
   });
 
   it('updateRobotPosition throws for non-existent robot', () => {
-    expect(() => updateRobotPosition(db, 999, 1, 1)).toThrow(
-      'No robot found with id 999'
-    );
+    expect(() => updateRobotPosition(db, 999, 1, 1)).toThrow('No robot found with id 999');
   });
 
   it('countRobotsAtPosition returns correct count', () => {

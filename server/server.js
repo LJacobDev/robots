@@ -22,6 +22,7 @@ const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
 // Initialize database schema and seed data on startup
 initializeDatabase(db);
 
+/** Express application instance. Exported for Supertest integration tests. */
 export const app = express();
 
 // Security middleware

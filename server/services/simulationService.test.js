@@ -3,7 +3,11 @@ import Database from 'better-sqlite3';
 import { initializeDatabase } from '../db/schema.js';
 import { createSimulation, getSimulation } from '../repositories/simulationRepository.js';
 import { createRobots, getRobotsBySimulation } from '../repositories/robotRepository.js';
-import { getTotalPresents, countHousesWithMinPresents, getHousesBySimulation } from '../repositories/houseRepository.js';
+import {
+  getTotalPresents,
+  countHousesWithMinPresents,
+  getHousesBySimulation,
+} from '../repositories/houseRepository.js';
 import { assignRobotNames } from '../utils/robotNames.js';
 import { stepSimulation, runSimulation } from './simulationService.js';
 
@@ -93,9 +97,7 @@ describe('stepSimulation', () => {
 
     stepSimulation(db, sim.id); // completes
 
-    expect(() => stepSimulation(db, sim.id)).toThrow(
-      'already completed'
-    );
+    expect(() => stepSimulation(db, sim.id)).toThrow('already completed');
 
     try {
       stepSimulation(db, sim.id);
@@ -105,9 +107,7 @@ describe('stepSimulation', () => {
   });
 
   it('step a non-existent simulation — throws error', () => {
-    expect(() => stepSimulation(db, 999)).toThrow(
-      'No simulation found'
-    );
+    expect(() => stepSimulation(db, 999)).toThrow('No simulation found');
 
     try {
       stepSimulation(db, 999);

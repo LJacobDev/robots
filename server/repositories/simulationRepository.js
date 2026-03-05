@@ -21,9 +21,7 @@ export function createSimulation(db, { userId, moveSequence, robotCount }) {
     )
     .run(userId, moveSequence, robotCount, createdAt);
 
-  return db
-    .prepare('SELECT * FROM simulations WHERE id = ?')
-    .get(result.lastInsertRowid);
+  return db.prepare('SELECT * FROM simulations WHERE id = ?').get(result.lastInsertRowid);
 }
 
 /**
@@ -34,10 +32,7 @@ export function createSimulation(db, { userId, moveSequence, robotCount }) {
  * @returns {{ id: number, user_id: number, move_sequence: string, robot_count: number, current_step: number, status: string, created_at: string } | null}
  */
 export function getSimulation(db, simulationId) {
-  return (
-    db.prepare('SELECT * FROM simulations WHERE id = ?').get(simulationId) ??
-    null
-  );
+  return db.prepare('SELECT * FROM simulations WHERE id = ?').get(simulationId) ?? null;
 }
 
 /**
@@ -48,9 +43,7 @@ export function getSimulation(db, simulationId) {
  * @returns {Array<{ id: number, user_id: number, move_sequence: string, robot_count: number, current_step: number, status: string, created_at: string }>}
  */
 export function listSimulations(db, userId) {
-  return db
-    .prepare('SELECT * FROM simulations WHERE user_id = ? ORDER BY id DESC')
-    .all(userId);
+  return db.prepare('SELECT * FROM simulations WHERE user_id = ? ORDER BY id DESC').all(userId);
 }
 
 /**
@@ -65,9 +58,7 @@ export function listSimulations(db, userId) {
  */
 export function updateSimulationStep(db, simulationId, newStep, newStatus) {
   const result = db
-    .prepare(
-      'UPDATE simulations SET current_step = ?, status = ? WHERE id = ?'
-    )
+    .prepare('UPDATE simulations SET current_step = ?, status = ? WHERE id = ?')
     .run(newStep, newStatus, simulationId);
 
   if (result.changes === 0) {

@@ -40,9 +40,7 @@ export function createRobots(db, simulationId, robotNames) {
  */
 export function getRobotsBySimulation(db, simulationId) {
   return db
-    .prepare(
-      'SELECT * FROM robots WHERE simulation_id = ? ORDER BY turn_order'
-    )
+    .prepare('SELECT * FROM robots WHERE simulation_id = ? ORDER BY turn_order')
     .all(simulationId);
 }
 
@@ -57,9 +55,7 @@ export function getRobotsBySimulation(db, simulationId) {
 export function getRobotByTurnOrder(db, simulationId, turnOrder) {
   return (
     db
-      .prepare(
-        'SELECT * FROM robots WHERE simulation_id = ? AND turn_order = ?'
-      )
+      .prepare('SELECT * FROM robots WHERE simulation_id = ? AND turn_order = ?')
       .get(simulationId, turnOrder) ?? null
   );
 }

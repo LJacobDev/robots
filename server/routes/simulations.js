@@ -14,14 +14,8 @@ import {
   getSimulation,
   listSimulations,
 } from '../repositories/simulationRepository.js';
-import {
-  createRobots,
-  getRobotsBySimulation,
-} from '../repositories/robotRepository.js';
-import {
-  getTotalPresents,
-  countHousesWithMinPresents,
-} from '../repositories/houseRepository.js';
+import { createRobots, getRobotsBySimulation } from '../repositories/robotRepository.js';
+import { getTotalPresents, countHousesWithMinPresents } from '../repositories/houseRepository.js';
 import { stepSimulation, runSimulation } from '../services/simulationService.js';
 import {
   validateCreateSimulation,
@@ -177,11 +171,7 @@ router.post('/:id/run', validateSimulationId, (req, res, next) => {
     const sim = getSimulation(db, req.simulationId);
     const robots = getRobotsBySimulation(db, req.simulationId);
     const totalPresents = getTotalPresents(db, req.simulationId);
-    const housesWithPresents = countHousesWithMinPresents(
-      db,
-      req.simulationId,
-      1
-    );
+    const housesWithPresents = countHousesWithMinPresents(db, req.simulationId, 1);
 
     res.json({
       simulation: {
@@ -223,11 +213,7 @@ router.get('/:id', validateSimulationId, (req, res, next) => {
 
     const robots = getRobotsBySimulation(db, req.simulationId);
     const totalPresents = getTotalPresents(db, req.simulationId);
-    const housesWithPresents = countHousesWithMinPresents(
-      db,
-      req.simulationId,
-      1
-    );
+    const housesWithPresents = countHousesWithMinPresents(db, req.simulationId, 1);
 
     res.json({
       simulation: formatSimulation(sim),
@@ -261,31 +247,22 @@ router.get('/:id/robots', validateSimulationId, (req, res, next) => {
 });
 
 // GET /simulations/:id/houses — Count houses by threshold (spec §4.5)
-router.get(
-  '/:id/houses',
-  validateSimulationId,
-  validateHouseQuery,
-  (req, res, next) => {
-    try {
-      const sim = getSimulationOr404(req.simulationId, res);
-      if (!sim) return;
+router.get('/:id/houses', validateSimulationId, validateHouseQuery, (req, res, next) => {
+  try {
+    const sim = getSimulationOr404(req.simulationId, res);
+    if (!sim) return;
 
-      const houseCount = countHousesWithMinPresents(
-        db,
-        req.simulationId,
-        req.minPresents
-      );
+    const houseCount = countHousesWithMinPresents(db, req.simulationId, req.minPresents);
 
-      res.json({
-        simulationId: sim.id,
-        minPresents: req.minPresents,
-        houseCount,
-      });
-    } catch (err) {
-      next(err);
-    }
+    res.json({
+      simulationId: sim.id,
+      minPresents: req.minPresents,
+      houseCount,
+    });
+  } catch (err) {
+    next(err);
   }
-);
+});
 
 // GET /simulations/:id/presents — Get total presents (spec §4.6)
 router.get('/:id/presents', validateSimulationId, (req, res, next) => {

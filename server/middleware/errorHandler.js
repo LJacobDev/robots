@@ -15,6 +15,7 @@
  * @param {import('express').Response} res
  * @param {import('express').NextFunction} next
  */
+// eslint-disable-next-line no-unused-vars -- Express requires 4 params to identify error middleware
 export function errorHandler(err, req, res, next) {
   const statusCode = err.statusCode || 500;
   const code = err.code || 'INTERNAL_ERROR';

@@ -1,9 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import {
-  validateCreateSimulation,
-  validateSimulationId,
-  validateHouseQuery,
-} from './validate.js';
+import { validateCreateSimulation, validateSimulationId, validateHouseQuery } from './validate.js';
 
 // Helpers for building mock Express req/res/next objects
 const makeReq = ({ body = {}, params = {}, query = {} } = {}) => ({ body, params, query });

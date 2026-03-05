@@ -191,8 +191,8 @@ Wire up all 8 endpoints per spec. Each handler: validates input, calls service/r
 
 Automated API tests cover the full HTTP request → route → service → repository → DB flow. Manual curl testing is unnecessary as it is slower and more error-prone than the automated suite. A curl examples file is maintained as human-readable API documentation for the README "Things to try out" section and quick reference.
 
-- [ ] Install `supertest` as dev dependency
-- [ ] Create API integration tests (`server/routes/simulations.test.js` or similar):
+- [x] Install `supertest` as dev dependency
+- [x] Create API integration tests (`server/routes/simulations.test.js` or similar):
   - **Happy path — full workflow:**
     - Create simulation → 201, response shape matches spec
     - Step through turns → 200, turn object with correct robot/direction/delivery
@@ -215,21 +215,21 @@ Automated API tests cover the full HTTP request → route → service → reposi
     - Create simulation with robotCount omitted → defaults to 1
     - GET houses with minPresents higher than any house → returns houseCount: 0
     - GET presents on fresh simulation (no steps) → returns totalPresents: 0
-- [ ] Create `docs/curl-examples.md` — curl commands for each endpoint with example responses, for use as human-readable API reference and README content
-- [ ] Verify logging output is informative but contains no sensitive data
+- [x] Create `docs/curl-examples.md` — curl commands for each endpoint with example responses, for use as human-readable API reference and README content
+- [x] Verify logging output is informative but contains no sensitive data
 
 ### 1.10 Phase 1 Checkpoint Review
 
-- [ ] All 8 endpoints working
-- [ ] All automated tests passing: unit (names, repositories, services, validation) and integration (Supertest API tests)
-- [ ] Error handling: every failure path returns consistent error JSON, logs the issue, nothing fails silently
-- [ ] Code review: JSDoc on all exported functions, consistent formatting
-- [ ] Spec accuracy check: do the actual API responses match what spec.md describes?
-- [ ] Verify lint toolchain works end-to-end: `npm run lint` runs without config errors, fix any missing dependencies (e.g. `@eslint/js`)
-- [ ] Run `npm run format` across entire codebase — no unformatted files
-- [ ] Run `npm run lint` across entire codebase — no warnings or errors
-- [ ] Verify dev server starts cleanly: `npm run dev:server` produces expected console output with no warnings
-- [ ] Verify all npm scripts work: `test`, `test:watch`, `lint`, `lint:fix`, `format`, `dev:server`
+- [x] All 8 endpoints working
+- [x] All automated tests passing: unit (names, repositories, services, validation) and integration (Supertest API tests)
+- [x] Error handling: every failure path returns consistent error JSON, logs the issue, nothing fails silently
+- [x] Code review: JSDoc on all exported functions, consistent formatting
+- [x] Spec accuracy check: do the actual API responses match what spec.md describes?
+- [x] Verify lint toolchain works end-to-end: `npm run lint` runs without config errors, fix any missing dependencies (e.g. `@eslint/js`)
+- [x] Run `npm run format` across entire codebase — no unformatted files
+- [x] Run `npm run lint` across entire codebase — no warnings or errors
+- [x] Verify dev server starts cleanly: `npm run dev:server` produces expected console output with no warnings
+- [x] Verify all npm scripts work: `test`, `test:watch`, `lint`, `lint:fix`, `format`, `dev:server`
 
 ---
 

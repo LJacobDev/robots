@@ -23,7 +23,7 @@ The backend exposes a RESTful API. The frontend (specified in a future version o
 - The simulation ends when all instructions in the move sequence have been consumed. Robots whose turns fall after the last instruction simply do not move.
 
 > **Design decision — origin delivery:**
-> The specification states "a present is delivered when a robot enters a space." Since robots begin at `(0, 0)` without moving into it, no present is delivered at the start. Moving *back* to `(0, 0)` from another space does count as entering it and triggers delivery (subject to the occupancy rule). This was chosen as the most literal reading of "enters."
+> The specification states "a present is delivered when a robot enters a space." Since robots begin at `(0, 0)` without moving into it, no present is delivered at the start. Moving _back_ to `(0, 0)` from another space does count as entering it and triggers delivery (subject to the occupancy rule). This was chosen as the most literal reading of "enters."
 
 > **Design decision — blocked delivery:**
 > When delivery is blocked, nothing is consumed or deferred. The robot simply doesn't deliver. We considered tracking "attempted but failed" deliveries, but the requirements only ask for present counts — tracking failures would add complexity without meeting a stated need.
@@ -38,45 +38,45 @@ Four tables. All resource tables include `user_id` for future multi-user support
 
 #### `users`
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | INTEGER | PRIMARY KEY AUTOINCREMENT | |
-| name | TEXT | NOT NULL | Seeded: "default" (id=1) |
+| Column | Type    | Constraints               | Notes                    |
+| ------ | ------- | ------------------------- | ------------------------ |
+| id     | INTEGER | PRIMARY KEY AUTOINCREMENT |                          |
+| name   | TEXT    | NOT NULL                  | Seeded: "default" (id=1) |
 
 #### `simulations`
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | INTEGER | PRIMARY KEY AUTOINCREMENT | |
-| user_id | INTEGER | NOT NULL, FK → users(id) | Default: 1 |
-| move_sequence | TEXT | NOT NULL | Full instruction string |
-| robot_count | INTEGER | NOT NULL | Must be >= 1 |
-| current_step | INTEGER | NOT NULL, DEFAULT 0 | 0-based index into move_sequence |
-| status | TEXT | NOT NULL, DEFAULT 'created' | 'created', 'running', 'completed' |
-| created_at | TEXT | NOT NULL | ISO 8601 timestamp |
+| Column        | Type    | Constraints                 | Notes                             |
+| ------------- | ------- | --------------------------- | --------------------------------- |
+| id            | INTEGER | PRIMARY KEY AUTOINCREMENT   |                                   |
+| user_id       | INTEGER | NOT NULL, FK → users(id)    | Default: 1                        |
+| move_sequence | TEXT    | NOT NULL                    | Full instruction string           |
+| robot_count   | INTEGER | NOT NULL                    | Must be >= 1                      |
+| current_step  | INTEGER | NOT NULL, DEFAULT 0         | 0-based index into move_sequence  |
+| status        | TEXT    | NOT NULL, DEFAULT 'created' | 'created', 'running', 'completed' |
+| created_at    | TEXT    | NOT NULL                    | ISO 8601 timestamp                |
 
 #### `robots`
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | INTEGER | PRIMARY KEY AUTOINCREMENT | |
-| simulation_id | INTEGER | NOT NULL, FK → simulations(id) | |
-| name | TEXT | NOT NULL | From names.json with cycling |
-| position_x | INTEGER | NOT NULL, DEFAULT 0 | Current x coordinate |
-| position_y | INTEGER | NOT NULL, DEFAULT 0 | Current y coordinate |
-| turn_order | INTEGER | NOT NULL | 0-based round-robin index |
-| UNIQUE | | (simulation_id, turn_order) | One robot per turn slot per sim |
+| Column        | Type    | Constraints                    | Notes                           |
+| ------------- | ------- | ------------------------------ | ------------------------------- |
+| id            | INTEGER | PRIMARY KEY AUTOINCREMENT      |                                 |
+| simulation_id | INTEGER | NOT NULL, FK → simulations(id) |                                 |
+| name          | TEXT    | NOT NULL                       | From names.json with cycling    |
+| position_x    | INTEGER | NOT NULL, DEFAULT 0            | Current x coordinate            |
+| position_y    | INTEGER | NOT NULL, DEFAULT 0            | Current y coordinate            |
+| turn_order    | INTEGER | NOT NULL                       | 0-based round-robin index       |
+| UNIQUE        |         | (simulation_id, turn_order)    | One robot per turn slot per sim |
 
 #### `houses`
 
-| Column | Type | Constraints | Notes |
-|--------|------|-------------|-------|
-| id | INTEGER | PRIMARY KEY AUTOINCREMENT | |
-| simulation_id | INTEGER | NOT NULL, FK → simulations(id) | |
-| x | INTEGER | NOT NULL | Grid x coordinate |
-| y | INTEGER | NOT NULL | Grid y coordinate |
-| presents_count | INTEGER | NOT NULL, DEFAULT 1 | Incremented on each delivery |
-| UNIQUE | | (simulation_id, x, y) | One row per coordinate per sim |
+| Column         | Type    | Constraints                    | Notes                          |
+| -------------- | ------- | ------------------------------ | ------------------------------ |
+| id             | INTEGER | PRIMARY KEY AUTOINCREMENT      |                                |
+| simulation_id  | INTEGER | NOT NULL, FK → simulations(id) |                                |
+| x              | INTEGER | NOT NULL                       | Grid x coordinate              |
+| y              | INTEGER | NOT NULL                       | Grid y coordinate              |
+| presents_count | INTEGER | NOT NULL, DEFAULT 1            | Incremented on each delivery   |
+| UNIQUE         |         | (simulation_id, x, y)          | One row per coordinate per sim |
 
 House rows are created **only** on successful delivery (not on blocked delivery or initialization). Every row in the houses table has `presents_count >= 1`.
 
@@ -133,10 +133,10 @@ Creates a new simulation with the specified number of robots and move sequence. 
 }
 ```
 
-| Field | Type | Required | Validation |
-|-------|------|----------|------------|
-| robotCount | integer | No (default: 1) | Must be >= 1 |
-| moveSequence | string | Yes | Must contain only `^`, `V`, `<`, `>`. Must not be empty. Lowercase `v` is accepted and normalized to `V` before validation. |
+| Field        | Type    | Required        | Validation                                                                                                                  |
+| ------------ | ------- | --------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| robotCount   | integer | No (default: 1) | Must be >= 1                                                                                                                |
+| moveSequence | string  | Yes             | Must contain only `^`, `V`, `<`, `>`. Must not be empty. Lowercase `v` is accepted and normalized to `V` before validation. |
 
 > **Design decision — moveSequence case normalization:**
 > The input validation middleware applies `.toUpperCase()` to the move sequence before checking it against the valid character set. This means `v` is silently accepted and stored as `V`, improving usability without relaxing correctness. `.toUpperCase()` was chosen over a targeted `.replace(/v/g, 'V')` because it is simpler to read and equally correct — the other three valid characters (`^`, `<`, `>`) are not alphabetic and are returned unchanged by the Unicode uppercase algorithm. At any realistic move sequence length, both approaches execute in microseconds; the performance difference is not a factor.
@@ -164,10 +164,10 @@ Creates a new simulation with the specified number of robots and move sequence. 
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_ROBOT_COUNT | robotCount < 1 or non-integer |
-| 400 | INVALID_MOVE_SEQUENCE | Empty, missing, or contains invalid characters |
+| Status | Code                  | When                                           |
+| ------ | --------------------- | ---------------------------------------------- |
+| 400    | INVALID_ROBOT_COUNT   | robotCount < 1 or non-integer                  |
+| 400    | INVALID_MOVE_SEQUENCE | Empty, missing, or contains invalid characters |
 
 ### 4.2 Step Simulation (One Turn)
 
@@ -221,11 +221,11 @@ When delivery is blocked:
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
-| 409 | SIMULATION_COMPLETED | Simulation has already consumed all moves |
+| Status | Code                  | When                                      |
+| ------ | --------------------- | ----------------------------------------- |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer             |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID                |
+| 409    | SIMULATION_COMPLETED  | Simulation has already consumed all moves |
 
 ### 4.3 Run Full Simulation
 
@@ -251,19 +251,19 @@ Runs the simulation to completion atomically. Returns the final state only — n
     { "name": "Bob", "turnOrder": 2, "position": { "x": 1, "y": -1 } }
   ],
   "summary": {
-    "totalPresentsDelivered": 4,
-    "housesWithPresents": 4
+    "totalPresentsDelivered": 5,
+    "housesWithPresents": 5
   }
 }
 ```
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
-| 409 | SIMULATION_COMPLETED | Simulation already completed |
+| Status | Code                  | When                          |
+| ------ | --------------------- | ----------------------------- |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID    |
+| 409    | SIMULATION_COMPLETED  | Simulation already completed  |
 
 > **Design decision — atomic run, no history:**
 > The "run full simulation" endpoint returns only the final state. Intermediate step history is not persisted or returned. This was chosen intentionally: the requirements ask for "run the entire simulation through the full sequence of moves" without specifying history. Step-by-step replay is available via the step endpoint. Storing a full move history would add storage and complexity for a feature not requested. If history becomes needed, the move sequence and starting state are deterministic — any past state can be reconstructed by replaying from the beginning.
@@ -290,10 +290,10 @@ Returns the current position of all robots in the simulation.
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
+| Status | Code                  | When                          |
+| ------ | --------------------- | ----------------------------- |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID    |
 
 ### 4.5 Get Houses by Present Threshold
 
@@ -303,9 +303,9 @@ Returns the count of houses that have received at least N presents.
 
 **Query parameters:**
 
-| Param | Type | Required | Validation |
-|-------|------|----------|------------|
-| minPresents | integer | Yes | Must be >= 1 |
+| Param       | Type    | Required | Validation   |
+| ----------- | ------- | -------- | ------------ |
+| minPresents | integer | Yes      | Must be >= 1 |
 
 **Success response:** `200 OK`
 
@@ -319,11 +319,11 @@ Returns the count of houses that have received at least N presents.
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 400 | INVALID_THRESHOLD | minPresents < 1 or non-integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
+| Status | Code                  | When                           |
+| ------ | --------------------- | ------------------------------ |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer  |
+| 400    | INVALID_THRESHOLD     | minPresents < 1 or non-integer |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID     |
 
 ### 4.6 Get Total Presents
 
@@ -342,10 +342,10 @@ Returns the total number of presents delivered across all houses.
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
+| Status | Code                  | When                          |
+| ------ | --------------------- | ----------------------------- |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID    |
 
 ### 4.7 List Simulations
 
@@ -396,18 +396,18 @@ Returns full details for a single simulation including robots and house data.
     { "name": "Bob", "turnOrder": 2, "position": { "x": 1, "y": -1 } }
   ],
   "summary": {
-    "totalPresentsDelivered": 4,
-    "housesWithPresents": 4
+    "totalPresentsDelivered": 5,
+    "housesWithPresents": 5
   }
 }
 ```
 
 **Error responses:**
 
-| Status | Code | When |
-|--------|------|------|
-| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
+| Status | Code                  | When                          |
+| ------ | --------------------- | ----------------------------- |
+| 400    | INVALID_SIMULATION_ID | :id is not a positive integer |
+| 404    | SIMULATION_NOT_FOUND  | No simulation with this ID    |
 
 > **Design decision — endpoints beyond the minimum set:**
 > The requirements specify 6 operations (create, step, run, query robots, query houses by threshold, query total presents). Two additional endpoints have been added: List Simulations (4.7) and Get Simulation Details (4.8). List Simulations is necessary for any frontend — without it, a user who refreshes the page has no way to discover existing simulation IDs. Get Simulation Details combines simulation metadata, robot positions, and a present summary into a single response, avoiding the need for 3 separate API calls to render a simulation's full state. Both endpoints reuse existing repository functions and introduce no new database queries, so their implementation cost is negligible and they create no redundancy with the required endpoints.
@@ -438,12 +438,12 @@ This keeps robots human-identifiable regardless of count.
 
 Managed via `.env` (gitignored) and `.env.example` (committed).
 
-| Variable | Default | Purpose |
-|----------|---------|---------|
-| PORT | 3000 | Express server port |
-| NODE_ENV | development | Controls logging verbosity, Express optimizations, error detail level |
-| DATABASE_PATH | ./data/robots.db | SQLite database file location |
-| ALLOWED_ORIGINS | http://localhost:5173 | CORS allowed origins |
+| Variable        | Default               | Purpose                                                               |
+| --------------- | --------------------- | --------------------------------------------------------------------- |
+| PORT            | 3000                  | Express server port                                                   |
+| NODE_ENV        | development           | Controls logging verbosity, Express optimizations, error detail level |
+| DATABASE_PATH   | ./data/robots.db      | SQLite database file location                                         |
+| ALLOWED_ORIGINS | http://localhost:5173 | CORS allowed origins                                                  |
 
 ### 6.2 Security Middleware
 
@@ -453,9 +453,11 @@ Managed via `.env` (gitignored) and `.env.example` (committed).
 > **Design decision — real security middleware vs. pseudocode:**
 > Unlike authentication (which requires significant implementation effort for this project's scope), helmet and CORS are one-line middleware additions that provide real protective value. Omitting them would be a missed signal for reviewers assessing production readiness.
 
-### 6.3 Authentication
+### 6.3 Authentication & Authorization
 
 Not implemented in v1. Pseudocode comments indicate where auth middleware would be inserted (before route handlers) and how it would set `req.user.id` to scope queries. The `user_id` columns in the schema are already present to support this upgrade path.
+
+When authentication is added, **authorization** would also be enforced: any request for a simulation whose `user_id` does not match `req.user.id` would return `403 Forbidden` with error code `FORBIDDEN`. This requires no schema changes — the `user_id` column on `simulations` already exists, and the check would be a single guard in each route handler or a shared middleware.
 
 ### 6.4 Static File Serving
 
@@ -465,16 +467,16 @@ In production, Express serves the Vite-built frontend from `dist/` and includes 
 
 ## 7. Tech Stack Summary
 
-| Layer | Choice | Rationale |
-|-------|--------|-----------|
-| Frontend | Vue 3.5+, Options API | Team compatibility; Composition API noted as alternative |
-| Bundler | Vite | Standard for Vue 3; fast HMR in dev, optimized builds |
-| Backend | Node.js + Express | Simple API endpoints; SSR not needed (Nuxt considered, rejected) |
-| Language | JavaScript | TypeScript adds friction for this project's scope |
-| Database | SQLite via better-sqlite3 | Zero setup; repository pattern enables trivial Postgres migration |
-| Testing | Vitest + Supertest | Vitest for unit/integration tests; Supertest for HTTP-level API tests |
-| Linting | ESLint v10 (flat config) + Prettier | Root-level config covering client + server |
-| Security | helmet.js + cors | Production-standard headers and origin control |
+| Layer    | Choice                              | Rationale                                                             |
+| -------- | ----------------------------------- | --------------------------------------------------------------------- |
+| Frontend | Vue 3.5+, Options API               | Team compatibility; Composition API noted as alternative              |
+| Bundler  | Vite                                | Standard for Vue 3; fast HMR in dev, optimized builds                 |
+| Backend  | Node.js + Express                   | Simple API endpoints; SSR not needed (Nuxt considered, rejected)      |
+| Language | JavaScript                          | TypeScript adds friction for this project's scope                     |
+| Database | SQLite via better-sqlite3           | Zero setup; repository pattern enables trivial Postgres migration     |
+| Testing  | Vitest + Supertest                  | Vitest for unit/integration tests; Supertest for HTTP-level API tests |
+| Linting  | ESLint v10 (flat config) + Prettier | Root-level config covering client + server                            |
+| Security | helmet.js + cors                    | Production-standard headers and origin control                        |
 
 > **Design decision — Express over Nuxt:**
 > Nuxt was considered since it unifies frontend and backend in a single framework. However, the application requires only a simple API and a single-page frontend — Nuxt's SSR, file-based routing, and auto-imports add complexity without corresponding benefit. Express is a well-understood, lightweight server that does exactly what is needed. If the application grew to need SEO or server-rendered pages, Nuxt would become the stronger choice.

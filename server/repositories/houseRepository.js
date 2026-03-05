@@ -78,9 +78,5 @@ export function countHousesWithMinPresents(db, simulationId, minPresents) {
  * @returns {Array<{ id: number, simulation_id: number, x: number, y: number, presents_count: number }>}
  */
 export function getHousesBySimulation(db, simulationId) {
-  return db
-    .prepare(
-      'SELECT * FROM houses WHERE simulation_id = ? ORDER BY x, y'
-    )
-    .all(simulationId);
+  return db.prepare('SELECT * FROM houses WHERE simulation_id = ? ORDER BY x, y').all(simulationId);
 }
