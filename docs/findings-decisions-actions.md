@@ -58,3 +58,32 @@ Vitest 4 has breaking changes to `poolOptions` (removed, now top-level) and mock
 ESLint 10 requires Node.js >= 20.19.0, Vite 7 requires Node.js >= 20. Both constraints are satisfied by Node 20 LTS.
 
 **Action:** `.nvmrc` must specify `20` (or a specific 20.x.x LTS version).
+
+---
+
+## 2026-03-04 — Repository Write Functions Return `result.changes`
+
+During Step 1.5 planning, discussed whether repository write functions (`updateSimulationStep`, `updateRobotPosition`, `deliverPresent`) should return `void` or a value.
+
+**Decision:** All three return `result.changes` (the integer count of rows affected by the statement). This provides two benefits:
+
+1. **Guard against silent no-ops:** If `changes === 0`, the function throws immediately, catching bugs like updating a nonexistent simulation or robot without needing a follow-up query.
+2. **Avoids redundant reads:** The service layer already loads the entity before updating, so it can compute the new state in memory. Returning `changes` confirms success without re-querying.
+
+Read-only functions and inserts are unaffected — reads return data or null naturally, and inserts throw on constraint violations via SQLite.
+
+**Action:** Implemented in `simulationRepository.js`, `robotRepository.js`, and `houseRepository.js`.
+
+---
+
+## 2026-03-04 — `runSimulation` Does Not Accumulate a Step History Array
+
+During Step 1.6 implementation, the initial version of `runSimulation` collected each step's result into an array and returned it. Reviewed whether this was appropriate.
+
+**Finding:** The `/run` endpoint only needs to return the final state (robot positions, house counts, total presents). No requirement asks for a step-by-step history. The console logging inside each `stepSimulation` call already provides a debug trace.
+
+**Concern:** Simulations could have thousands of steps. Accumulating an object per step wastes memory for data that has no consumer. The route handler would still need to query the DB for aggregates (total presents, house counts) regardless, so the array doesn't even eliminate DB reads.
+
+**Decision:** `runSimulation` loops `stepSimulation` internally without collecting results. The route handler queries final state from the DB after the run completes.
+
+**Action:** Removed the `results` array from `runSimulation`. Updated tests to verify final state via repository queries instead of inspecting returned step objects.

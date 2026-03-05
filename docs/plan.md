@@ -59,27 +59,27 @@ This phase delivers a fully working backend with all API endpoints verified by a
 
 ### 1.3 Database Setup
 
-- [ ] Create `server/db/connection.js`
+- [x] Create `server/db/connection.js`
   - Opens (or creates) SQLite database at `DATABASE_PATH`
   - Enables WAL mode for better concurrent read performance
   - Exports the database instance
   - Logs connection success/failure
-- [ ] Create `server/db/schema.js`
+- [x] Create `server/db/schema.js`
   - `initializeDatabase()` function that creates all 4 tables if not exists
   - `users`, `simulations`, `robots`, `houses` — per spec schema
   - Create indexes: `robots(simulation_id)`, `houses(simulation_id)` per spec §3.2
   - Seeds default user (id=1, name="default") if not exists
   - Called on server startup
-- [ ] Verify: server starts, `data/robots.db` is created with correct tables, default user is seeded
+- [x] Verify: server starts, `data/robots.db` is created with correct tables, default user is seeded
 
 ### 1.4 Robot Naming System
 
-- [ ] Create `data/names.json` — array of 20 names (Robbie, Jane, Bob + 17 common names)
-- [ ] Create `server/utils/robotNames.js`
+- [x] Create `data/names.json` — array of 20 names (Robbie, Jane, Bob + 17 common names)
+- [x] Create `server/utils/robotNames.js`
   - `assignRobotNames(count)` — returns array of names for the given robot count
   - Cycles through the 20 names with `_2`, `_3` suffixes for counts > 20
   - Unit testable as a pure function
-- [ ] Write tests: `server/utils/robotNames.test.js`
+- [x] Write tests: `server/utils/robotNames.test.js`
   - 1 robot → ["Robbie"]
   - 3 robots → ["Robbie", "Jane", "Bob"]
   - 20 robots → all 20 names
@@ -91,24 +91,24 @@ This phase delivers a fully working backend with all API endpoints verified by a
 
 All database operations as named functions. Each function takes the db instance and relevant parameters. All queries use parameterized statements.
 
-- [ ] Create `server/repositories/simulationRepository.js`
+- [x] Create `server/repositories/simulationRepository.js`
   - `createSimulation(db, { userId, moveSequence, robotCount })` → returns simulation row
   - `getSimulation(db, simulationId)` → returns simulation or null
   - `listSimulations(db, userId)` → returns array of simulations
   - `updateSimulationStep(db, simulationId, newStep, newStatus)` → updates current_step and status
-- [ ] Create `server/repositories/robotRepository.js`
+- [x] Create `server/repositories/robotRepository.js`
   - `createRobots(db, simulationId, robotNames)` → bulk inserts robots at (0,0)
   - `getRobotsBySimulation(db, simulationId)` → returns all robots for a simulation
   - `getRobotByTurnOrder(db, simulationId, turnOrder)` → returns single robot
   - `updateRobotPosition(db, robotId, x, y)` → updates position
   - `countRobotsAtPosition(db, simulationId, x, y)` → returns count of robots at a coordinate
     - **Important:** This check must happen **before** the moving robot's position is updated in the DB. The query asks "is any other robot already at this destination?" If count > 0, delivery is blocked. If we checked after the move, we'd need count > 1 (since the moving robot would already be counted), which is more error-prone.
-- [ ] Create `server/repositories/houseRepository.js`
+- [x] Create `server/repositories/houseRepository.js`
   - `deliverPresent(db, simulationId, x, y)` → INSERT or UPDATE presents_count (upsert)
   - `getTotalPresents(db, simulationId)` → SUM(presents_count)
   - `countHousesWithMinPresents(db, simulationId, minPresents)` → COUNT where presents_count >= N
   - `getHousesBySimulation(db, simulationId)` → returns all houses (for future grid display)
-- [ ] Write repository tests (using in-memory SQLite for speed):
+- [x] Write repository tests (using in-memory SQLite for speed):
   - Simulation CRUD operations
   - Robot creation and position updates
   - House upsert logic (first delivery creates row with presents_count=1)
@@ -120,7 +120,7 @@ All database operations as named functions. Each function takes the db instance 
 
 ### 1.6 Simulation Engine (Step Logic)
 
-- [ ] Create `server/services/simulationService.js`
+- [x] Create `server/services/simulationService.js`
   - `stepSimulation(db, simulationId)` — core step logic:
     1. Get simulation, validate not completed
     2. Determine which robot's turn: `current_step % robot_count`
@@ -133,7 +133,7 @@ All database operations as named functions. Each function takes the db instance 
     9. Return turn result object with message
   - `runSimulation(db, simulationId)` — loops `stepSimulation` until complete
   - All DB operations wrapped in a transaction for atomicity
-- [ ] Write service tests:
+- [x] Write service tests:
   - Single robot, single move — delivers present
   - Two robots, same destination — second robot blocked
   - Robot moves back to origin (0,0) — should deliver (entering the space)

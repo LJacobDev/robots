@@ -6,6 +6,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { createApiRouter } from './routes/index.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { db } from './db/connection.js';
+import { initializeDatabase } from './db/schema.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,6 +18,9 @@ const NODE_ENV = process.env.NODE_ENV || 'development';
 const ALLOWED_ORIGINS = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((o) => o.trim())
   : ['http://localhost:5173'];
+
+// Initialize database schema and seed data on startup
+initializeDatabase(db);
 
 export const app = express();
 
@@ -33,7 +38,7 @@ app.use('/api/v1', createApiRouter());
 // In production, serve the Vite-built frontend and handle SPA routing
 if (NODE_ENV === 'production') {
   app.use(express.static(path.join(rootDir, 'dist')));
-  app.use((req, res) => {
+  app.use((_req, res) => {
     res.sendFile(path.join(rootDir, 'dist', 'index.html'));
   });
 }

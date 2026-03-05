@@ -7,6 +7,8 @@
   "type": "module",
   "scripts": {
     "dev:server": "node --watch server/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write ."
