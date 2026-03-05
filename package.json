@@ -1,0 +1,30 @@
+{
+  "name": "robots",
+  "version": "1.0.0",
+  "description": "A full stack application that simulates robots moving around on a grid delivering presents, running the simulation logic and storing state in the backend, where the UI is an interface and display of what is going on without running any of the simulation logic itself.",
+  "license": "MIT",
+  "author": "LJacobDev",
+  "type": "module",
+  "scripts": {
+    "dev:server": "node --watch server/server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.8.0",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "supertest": "^7.2.2",
+    "vitest": "^4.0.18"
+  }
+}

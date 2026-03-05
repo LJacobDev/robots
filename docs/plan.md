@@ -8,8 +8,8 @@ This phase delivers a fully working backend with all API endpoints verified by a
 
 ### 1.1 Project Scaffolding
 
-- [ ] Initialize root `package.json` with `npm init`
-- [ ] Create folder structure:
+- [x] Initialize root `package.json` with `npm init`
+- [x] Create folder structure:
   ```
   /server
     /routes
@@ -30,21 +30,21 @@ This phase delivers a fully working backend with all API endpoints verified by a
   .gitignore
   .nvmrc
   ```
-- [ ] Create `.env.example` with `PORT`, `NODE_ENV`, `DATABASE_PATH`, `ALLOWED_ORIGINS`
-- [ ] Create `.env` (gitignored) with development values
-- [ ] Create `.gitignore` (node_modules, .env, *.db, dist/)
-- [ ] Create `.nvmrc` with Node LTS version
-- [ ] Install backend dependencies: `express`, `better-sqlite3`, `helmet`, `cors`, `dotenv`
-- [ ] Install dev dependencies: `vitest`, `supertest`, `eslint`, `prettier`, `eslint-plugin-vue`, `eslint-config-prettier`, `globals`
-- [ ] Create `eslint.config.js` (ESLint v10 flat config, covers /server and /client)
-- [ ] Create `.prettierrc`
-- [ ] Create `.vscode/settings.json` (format on save, ESLint fix on save)
-- [ ] Create `.vscode/extensions.json` (Vue.volar, prettier, eslint, vitest)
-- [ ] Add `lint`, `lint:fix`, `format` scripts to root `package.json`
+- [x] Create `.env.example` with `PORT`, `NODE_ENV`, `DATABASE_PATH`, `ALLOWED_ORIGINS`
+- [x] Create `.env` (gitignored) with development values
+- [x] Create `.gitignore` (node_modules, .env, \*.db, dist/)
+- [x] Create `.nvmrc` with Node LTS version
+- [x] Install backend dependencies: `express`, `better-sqlite3`, `helmet`, `cors`, `dotenv`
+- [x] Install dev dependencies: `vitest`, `supertest`, `eslint`, `prettier`, `eslint-plugin-vue`, `eslint-config-prettier`, `globals`
+- [x] Create `eslint.config.js` (ESLint v10 flat config, covers /server and /client)
+- [x] Create `.prettierrc`
+- [x] Create `.vscode/settings.json` (format on save, ESLint fix on save)
+- [x] Create `.vscode/extensions.json` (Vue.volar, prettier, eslint, vitest)
+- [x] Add `lint`, `lint:fix`, `format` scripts to root `package.json`
 
 ### 1.2 Express Server Setup
 
-- [ ] Create `server/server.js` — entry point
+- [x] Create `server/server.js` — entry point
   - Load dotenv
   - Import and apply middleware: helmet, cors, express.json()
   - Mount API router at `/api/v1`
@@ -52,10 +52,10 @@ This phase delivers a fully working backend with all API endpoints verified by a
   - Add global error handler middleware
   - Start listening on `PORT`
   - Console log: server started, port, environment
-- [ ] Create `server/middleware/errorHandler.js` — consistent error response format
-- [ ] Create `server/routes/index.js` — main router, mounts simulation routes
-- [ ] Add `dev:server` script to `package.json` (e.g., `node server/server.js` or with `--watch` flag)
-- [ ] Verify: `npm run dev:server` starts Express, hitting `/api/v1` returns a placeholder response
+- [x] Create `server/middleware/errorHandler.js` — consistent error response format
+- [x] Create `server/routes/index.js` — main router, mounts simulation routes
+- [x] Add `dev:server` script to `package.json` (e.g., `node server/server.js` or with `--watch` flag)
+- [x] Verify: `npm run dev:server` starts Express, hitting `/api/v1` returns a placeholder response
 
 ### 1.3 Database Setup
 
@@ -84,8 +84,8 @@ This phase delivers a fully working backend with all API endpoints verified by a
   - 3 robots → ["Robbie", "Jane", "Bob"]
   - 20 robots → all 20 names
   - 21 robots → 20 names + "Robbie_2"
-  - 40 robots → full cycle + full cycle with _2
-  - 41 robots → starts _3 cycle
+  - 40 robots → full cycle + full cycle with \_2
+  - 41 robots → starts \_3 cycle
 
 ### 1.5 Repository Layer
 
@@ -220,4 +220,4 @@ Automated API tests cover the full HTTP request → route → service → reposi
 
 ---
 
-*Phases 2+ (Frontend UI, CSS grid visualization, polish, Docker, final review) will be planned after Phase 1 is complete and the spec is updated with frontend decisions.*
+_Phases 2+ (Frontend UI, CSS grid visualization, polish, Docker, final review) will be planned after Phase 1 is complete and the spec is updated with frontend decisions._
