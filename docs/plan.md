@@ -148,35 +148,44 @@ All database operations as named functions. Each function takes the db instance 
 
 ### 1.7 Input Validation & Sanitization
 
-- [ ] Create `server/middleware/validate.js`
-  - `validateCreateSimulation` — checks robotCount (integer, >= 1) and moveSequence (non-empty, valid chars only)
-  - `validateStepOrRun` — checks :id is a valid integer
-  - `validateHouseQuery` — checks minPresents query param (integer, >= 1)
-  - Strip/escape control characters from string inputs
+- [x] Create `server/middleware/validate.js`
+  - `validateCreateSimulation` — checks robotCount (integer, >= 1) and moveSequence (non-empty, valid chars only); normalizes moveSequence with `.toUpperCase()` and strips control characters; writes cleaned value back to `req.body.moveSequence`
+  - `validateSimulationId` — checks :id param is a positive integer (>= 1); writes parsed value to `req.simulationId` (renamed from `validateStepOrRun` — applies to all 6 :id routes, not just step/run)
+  - `validateHouseQuery` — checks minPresents query param (integer, >= 1, required); writes parsed value to `req.minPresents`
+  - Strip control characters (0x00–0x1F, 0x7F) from string inputs
   - Parameterized queries handle SQL injection (built into repository layer)
-- [ ] Write validation tests:
-  - Valid inputs pass
+- [x] Write validation tests:
+  - Valid inputs pass through and call next()
+  - moveSequence normalized: lowercase 'v' → 'V', written back to req.body
   - Missing moveSequence → 400
+  - moveSequence = null → 400
+  - moveSequence whitespace-only → 400 (fails valid-chars regex)
   - Invalid characters in moveSequence → 400
   - robotCount = 0 → 400
   - robotCount = -1 → 400
   - robotCount = "abc" → 400
-  - minPresents = 0 → 400
+  - robotCount = 1.5 (float) → 400
+  - robotCount = null → 400
   - Simulation ID = "abc" → 400
+  - Simulation ID = 0 → 400
+  - Simulation ID = -5 → 400
+  - minPresents missing → 400
+  - minPresents = 0 → 400
+  - minPresents = 1.5 → 400 (decimal string fails integer pattern)
 
 ### 1.8 Route Handlers
 
 Wire up all 8 endpoints per spec. Each handler: validates input, calls service/repository, formats response, handles errors with try/catch and logging.
 
-- [ ] `POST /api/v1/simulations` — create simulation
-- [ ] `POST /api/v1/simulations/:id/step` — step one turn
-- [ ] `POST /api/v1/simulations/:id/run` — run full simulation
-- [ ] `GET /api/v1/simulations` — list all simulations
-- [ ] `GET /api/v1/simulations/:id` — get simulation details
-- [ ] `GET /api/v1/simulations/:id/robots` — get robot positions
-- [ ] `GET /api/v1/simulations/:id/houses?minPresents=N` — count houses by threshold
-- [ ] `GET /api/v1/simulations/:id/presents` — get total presents
-- [ ] Add auth pseudocode comments on each route handler (where middleware would go)
+- [x] `POST /api/v1/simulations` — create simulation
+- [x] `POST /api/v1/simulations/:id/step` — step one turn
+- [x] `POST /api/v1/simulations/:id/run` — run full simulation
+- [x] `GET /api/v1/simulations` — list all simulations
+- [x] `GET /api/v1/simulations/:id` — get simulation details
+- [x] `GET /api/v1/simulations/:id/robots` — get robot positions
+- [x] `GET /api/v1/simulations/:id/houses?minPresents=N` — count houses by threshold
+- [x] `GET /api/v1/simulations/:id/presents` — get total presents
+- [x] Add auth pseudocode comments on each route handler (where middleware would go)
 
 ### 1.9 API Integration Tests (Supertest) & Curl Reference
 
@@ -214,9 +223,13 @@ Automated API tests cover the full HTTP request → route → service → reposi
 - [ ] All 8 endpoints working
 - [ ] All automated tests passing: unit (names, repositories, services, validation) and integration (Supertest API tests)
 - [ ] Error handling: every failure path returns consistent error JSON, logs the issue, nothing fails silently
-- [ ] Code review: JSDoc on all exported functions, consistent formatting (run `npm run lint` and `npm run format`)
+- [ ] Code review: JSDoc on all exported functions, consistent formatting
 - [ ] Spec accuracy check: do the actual API responses match what spec.md describes?
-- [ ] Run lint and format across entire codebase — no warnings or errors
+- [ ] Verify lint toolchain works end-to-end: `npm run lint` runs without config errors, fix any missing dependencies (e.g. `@eslint/js`)
+- [ ] Run `npm run format` across entire codebase — no unformatted files
+- [ ] Run `npm run lint` across entire codebase — no warnings or errors
+- [ ] Verify dev server starts cleanly: `npm run dev:server` produces expected console output with no warnings
+- [ ] Verify all npm scripts work: `test`, `test:watch`, `lint`, `lint:fix`, `format`, `dev:server`
 
 ---
 

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import simulationsRouter from './simulations.js';
 
 /**
  * Creates and returns the main API v1 router.
@@ -12,13 +13,11 @@ export function createApiRouter() {
   const router = Router();
 
   // Health check — confirms the API is reachable
-  router.get('/', (req, res) => {
+  router.get('/', (_req, res) => {
     res.json({ message: 'Robots API v1' });
   });
 
-  // TODO 1.8: mount simulation routes
-  // import simulationsRouter from './simulations.js';
-  // router.use('/simulations', simulationsRouter);
+  router.use('/simulations', simulationsRouter);
 
   // 404 handler for unmatched API routes (must be last in this router)
   router.use((req, res) => {

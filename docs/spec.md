@@ -136,7 +136,10 @@ Creates a new simulation with the specified number of robots and move sequence. 
 | Field | Type | Required | Validation |
 |-------|------|----------|------------|
 | robotCount | integer | No (default: 1) | Must be >= 1 |
-| moveSequence | string | Yes | Must contain only `^`, `V`, `<`, `>`. Must not be empty. |
+| moveSequence | string | Yes | Must contain only `^`, `V`, `<`, `>`. Must not be empty. Lowercase `v` is accepted and normalized to `V` before validation. |
+
+> **Design decision — moveSequence case normalization:**
+> The input validation middleware applies `.toUpperCase()` to the move sequence before checking it against the valid character set. This means `v` is silently accepted and stored as `V`, improving usability without relaxing correctness. `.toUpperCase()` was chosen over a targeted `.replace(/v/g, 'V')` because it is simpler to read and equally correct — the other three valid characters (`^`, `<`, `>`) are not alphabetic and are returned unchanged by the Unicode uppercase algorithm. At any realistic move sequence length, both approaches execute in microseconds; the performance difference is not a factor.
 
 **Success response:** `201 Created`
 
@@ -220,6 +223,7 @@ When delivery is blocked:
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 | 409 | SIMULATION_COMPLETED | Simulation has already consumed all moves |
 
@@ -257,6 +261,7 @@ Runs the simulation to completion atomically. Returns the final state only — n
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 | 409 | SIMULATION_COMPLETED | Simulation already completed |
 
@@ -287,6 +292,7 @@ Returns the current position of all robots in the simulation.
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 
 ### 4.5 Get Houses by Present Threshold
@@ -315,8 +321,9 @@ Returns the count of houses that have received at least N presents.
 
 | Status | Code | When |
 |--------|------|------|
-| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 400 | INVALID_THRESHOLD | minPresents < 1 or non-integer |
+| 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 
 ### 4.6 Get Total Presents
 
@@ -337,6 +344,7 @@ Returns the total number of presents delivered across all houses.
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 
 ### 4.7 List Simulations
@@ -398,6 +406,7 @@ Returns full details for a single simulation including robots and house data.
 
 | Status | Code | When |
 |--------|------|------|
+| 400 | INVALID_SIMULATION_ID | :id is not a positive integer |
 | 404 | SIMULATION_NOT_FOUND | No simulation with this ID |
 
 > **Design decision — endpoints beyond the minimum set:**
