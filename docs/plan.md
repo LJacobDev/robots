@@ -247,27 +247,29 @@ This phase delivers the complete frontend application per spec §8–§16. It bu
 
 The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data source. It needs to include house coordinates so the grid can render delivered presents. The repository function `getHousesBySimulation()` already exists — this step wires it into the route handler.
 
-- [ ] In `server/routes/simulations.js`, update the `GET /simulations/:id` handler to fetch houses via `getHousesBySimulation()` and include a `houses` array in the response (each entry: `{ x, y, presentsCount }`)
-- [ ] Update existing integration tests in `server/routes/simulations.test.js` to verify the `houses` array is present and correct in the `GET /simulations/:id` response
-- [ ] Update `docs/curl-examples.md` to show the new `houses` field in the example response
-- [ ] Verify: `npm test` passes, `GET /simulations/:id` returns houses after stepping or running
+- [x] In `server/routes/simulations.js`, update the `GET /simulations/:id` handler to fetch houses via `getHousesBySimulation()` and include a `houses` array in the response (each entry: `{ x, y, presentsCount }`)
+- [x] Update existing integration tests in `server/routes/simulations.test.js` to verify the `houses` array is present and correct in the `GET /simulations/:id` response
+- [x] Update `docs/curl-examples.md` to show the new `houses` field in the example response
+- [x] Verify: `npm test` passes, `GET /simulations/:id` returns houses after stepping or running
 
 ### 2.1 Vue Project Scaffolding
 
-- [ ] Run `npm create vue@latest` inside the `client/` directory (no Router, no Pinia, no TypeScript, no JSX, with Vitest, with ESLint + Prettier — defer to root config)
-- [ ] Configure `vite.config.js`:
+- [x] Run `npm create vue@latest` inside the `client/` directory (blank project, no Router, no Pinia, no TypeScript, no JSX, no Vitest/ESLint/Prettier — deferred to root config)
+- [x] Configure `vite.config.js`:
   - Dev proxy: `/api` → `http://localhost:3000`
   - `build.outDir`: `../dist` (root-level dist, per spec §6.4)
   - `build.emptyOutDir`: true
-- [ ] Install `autoprefixer` and create `postcss.config.js`
-- [ ] Verify the root ESLint flat config covers `client/src/**` — adjust if needed
-- [ ] Add npm scripts to root `package.json`:
+  - `root`: set to `client/` directory so Vite finds `index.html`
+- [x] Install `autoprefixer` and create `postcss.config.js`
+- [x] Verify the root ESLint flat config covers `client/src/**` — already configured
+- [x] Add npm scripts to root `package.json`:
   - `dev:client` — runs Vite dev server from `client/`
-  - `dev` — runs both `dev:server` and `dev:client` concurrently (or as instructions to run in two terminals)
   - `build` — runs Vite build from `client/`
-- [ ] Add `dist/` to `.gitignore` if not already present
-- [ ] Remove Vue scaffold boilerplate (default App.vue content, HelloWorld, demo styles)
-- [ ] Verify: `npm run dev:client` starts Vite, proxied API calls to `http://localhost:5173/api/v1/simulations` return data from the backend
+  - `start` — runs production server
+  - (No combined `dev` script — run `dev:server` and `dev:client` in separate terminals)
+- [x] Add `dist/` to `.gitignore` — already present; also added `*.log` and `coverage/`
+- [x] Remove Vue scaffold boilerplate (default App.vue content, scaffold package.json/.gitignore/README/.vscode)
+- [x] Verify: `npm run dev:client` starts Vite, proxied API calls to `http://localhost:5173/api/v1/simulations` return data from the backend
 
 ### 2.2 CSS Foundation & Design Tokens
 
@@ -398,7 +400,7 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 ### 2.10 Simulation Grid
 
 - [ ] Create `SimulationGrid.vue` component:
-  - Props: `robots` (array), `houses` (array), `robotCount` (number for color calculation)
+  - Props: `robots` (array), `houses` (array), `robotCount` (number for color calculation — assign each robot an HSL color via `hue = (robot.turnOrder / robotCount) * 360` to space colors evenly around the wheel)
   - The grid container uses a CSS background pattern for grid lines (repeating-linear-gradient or background-size)
   - Container is sized to the bounding box of all robots + houses, plus padding
 - [ ] Position robot markers using `transform: translate()` based on grid coordinates

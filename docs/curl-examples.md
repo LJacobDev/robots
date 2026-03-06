@@ -172,12 +172,21 @@ curl -s http://localhost:3000/api/v1/simulations/1 | jq
     { "name": "Jane", "turnOrder": 1, "position": { "x": -1, "y": 1 } },
     { "name": "Bob", "turnOrder": 2, "position": { "x": 1, "y": -1 } }
   ],
+  "houses": [
+    { "x": -1, "y": 1, "presentsCount": 1 },
+    { "x": 0, "y": -1, "presentsCount": 1 },
+    { "x": 0, "y": 1, "presentsCount": 1 },
+    { "x": 1, "y": -1, "presentsCount": 1 },
+    { "x": 1, "y": 0, "presentsCount": 1 }
+  ],
   "summary": {
     "totalPresentsDelivered": 5,
     "housesWithPresents": 5
   }
 }
 ```
+
+The `houses` array contains every house that has received at least one present, with its coordinates and present count. Houses are ordered by `(x, y)`.
 
 ---
 

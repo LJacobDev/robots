@@ -120,3 +120,13 @@ Considered whether to split test scripts by layer (`test:server`, `test:client`)
 **Rationale:** With ~100 total tests across server and client, the full suite runs in seconds. Splitting into multiple scripts adds `package.json` clutter and coordination overhead without meaningful benefit at this scale. For ad-hoc targeted runs during development, `vitest --dir server` or `vitest --dir client` can be used directly in the terminal without needing dedicated scripts.
 
 **Action:** Updated plan steps 2.4 and 2.19 to reflect a single unified test command.
+
+---
+
+## 2026-03-05 — Single Root `package.json` (Monorepo Without Workspaces)
+
+During Vue scaffold setup, decided whether to keep the scaffold-generated `client/package.json` as a separate workspace or consolidate all dependencies into the root `package.json`.
+
+**Decision:** Single root `package.json`. The `client/package.json` is deleted after scaffolding.
+
+**Rationale:** The backend dependencies (`express`, `better-sqlite3`, `helmet`, `cors`, `dotenv`) and client dependencies (`vue`, `@vitejs/plugin-vue`, `vite`) have zero overlap, so there is no risk of version conflicts. A single `package.json` keeps all scripts in one place, allows a single `npm install` on a fresh clone, and lets Vitest run all tests from one root config without workspace coordination. If the project grew to have overlapping or conflicting dependency versions, npm workspaces or a tool like Turborepo would be warranted — but for this scope, the added indirection isn't justified.

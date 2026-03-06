@@ -273,7 +273,7 @@ describe('GET /api/v1/simulations', () => {
 // ---------------------------------------------------------------------------
 
 describe('GET /api/v1/simulations/:id', () => {
-  it('returns simulation + robots + summary', async () => {
+  it('returns simulation + robots + houses + summary', async () => {
     const {
       body: { simulation: sim },
     } = await createSim({
@@ -292,6 +292,11 @@ describe('GET /api/v1/simulations/:id', () => {
       status: 'completed',
     });
     expect(res.body.robots).toHaveLength(2);
+    expect(res.body.houses).toBeInstanceOf(Array);
+    expect(res.body.houses.length).toBeGreaterThan(0);
+    expect(res.body.houses[0]).toHaveProperty('x');
+    expect(res.body.houses[0]).toHaveProperty('y');
+    expect(res.body.houses[0]).toHaveProperty('presentsCount');
     expect(res.body.summary).toHaveProperty('totalPresentsDelivered');
     expect(res.body.summary).toHaveProperty('housesWithPresents');
   });
@@ -462,11 +467,18 @@ describe('full simulation workflow', () => {
     expect(runRes.body.simulation.status).toBe('completed');
     expect(runRes.body.simulation.currentStep).toBe(6);
 
-    // 6. Get full details — verify final state
+    // 6. Get full details — verify final state including houses
     const detailRes = await request.get(`/api/v1/simulations/${simId}`);
     expect(detailRes.status).toBe(200);
     expect(detailRes.body.simulation.status).toBe('completed');
     expect(detailRes.body.robots).toHaveLength(3);
+    expect(detailRes.body.houses).toBeInstanceOf(Array);
+    expect(detailRes.body.houses).toHaveLength(5);
+    expect(detailRes.body.houses[0]).toMatchObject({
+      x: expect.any(Number),
+      y: expect.any(Number),
+      presentsCount: expect.any(Number),
+    });
     expect(detailRes.body.summary.totalPresentsDelivered).toBe(5);
     expect(detailRes.body.summary.housesWithPresents).toBe(5);
 

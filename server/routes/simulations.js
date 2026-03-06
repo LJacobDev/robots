@@ -15,7 +15,11 @@ import {
   listSimulations,
 } from '../repositories/simulationRepository.js';
 import { createRobots, getRobotsBySimulation } from '../repositories/robotRepository.js';
-import { getTotalPresents, countHousesWithMinPresents } from '../repositories/houseRepository.js';
+import {
+  getTotalPresents,
+  countHousesWithMinPresents,
+  getHousesBySimulation,
+} from '../repositories/houseRepository.js';
 import { stepSimulation, runSimulation } from '../services/simulationService.js';
 import {
   validateCreateSimulation,
@@ -51,6 +55,17 @@ function formatRobot(row) {
     name: row.name,
     turnOrder: row.turn_order,
     position: { x: row.position_x, y: row.position_y },
+  };
+}
+
+/**
+ * Formats a house DB row into the API response shape.
+ */
+function formatHouse(row) {
+  return {
+    x: row.x,
+    y: row.y,
+    presentsCount: row.presents_count,
   };
 }
 
@@ -212,12 +227,14 @@ router.get('/:id', validateSimulationId, (req, res, next) => {
     if (!sim) return;
 
     const robots = getRobotsBySimulation(db, req.simulationId);
+    const houses = getHousesBySimulation(db, req.simulationId);
     const totalPresents = getTotalPresents(db, req.simulationId);
     const housesWithPresents = countHousesWithMinPresents(db, req.simulationId, 1);
 
     res.json({
       simulation: formatSimulation(sim),
       robots: robots.map(formatRobot),
+      houses: houses.map(formatHouse),
       summary: {
         totalPresentsDelivered: totalPresents,
         housesWithPresents,
