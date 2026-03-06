@@ -12,9 +12,27 @@ import SimulationList from '../../components/SimulationList.vue';
 
 /** Sample simulations matching the shape returned by listSimulations() */
 const sampleSimulations = [
-  { id: 1, status: 'created', moveSequence: '^^VV<>', robotCount: 2, createdAt: '2026-03-06T10:30:00Z' },
-  { id: 2, status: 'running', moveSequence: '^>V<^>V<', robotCount: 3, createdAt: '2026-03-06T11:00:00Z' },
-  { id: 3, status: 'completed', moveSequence: '>>><<<^^^VVV', robotCount: 1, createdAt: '2026-03-06T11:30:00Z' },
+  {
+    id: 1,
+    status: 'created',
+    moveSequence: '^^VV<>',
+    robotCount: 2,
+    createdAt: '2026-03-06T10:30:00Z',
+  },
+  {
+    id: 2,
+    status: 'running',
+    moveSequence: '^>V<^>V<',
+    robotCount: 3,
+    createdAt: '2026-03-06T11:00:00Z',
+  },
+  {
+    id: 3,
+    status: 'completed',
+    moveSequence: '>>><<<^^^VVV',
+    robotCount: 1,
+    createdAt: '2026-03-06T11:30:00Z',
+  },
 ];
 
 describe('SimulationList', () => {

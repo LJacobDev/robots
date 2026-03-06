@@ -27,28 +27,22 @@
           :data-robot-id="robot.name"
           :title="`${robot.name} (${robot.position.x}, ${robot.position.y})`"
         >
-          <RobotMarker :color="robotColor(robot.turnOrder)" :size="markerSize" :label="robot.name" />
+          <RobotMarker
+            :color="robotColor(robot.turnOrder)"
+            :size="markerSize"
+            :label="robot.name"
+          />
         </div>
       </div>
     </div>
 
     <!-- Zoom controls (outside scrollable viewport so they stay fixed) -->
     <div class="zoom-controls">
-      <button
-        class="zoom-btn"
-        :disabled="zoomLevel >= maxZoom"
-        title="Zoom in"
-        @click="zoomIn"
-      >
+      <button class="zoom-btn" :disabled="zoomLevel >= maxZoom" title="Zoom in" @click="zoomIn">
         +
       </button>
       <span class="zoom-label">{{ zoomPercent }}%</span>
-      <button
-        class="zoom-btn"
-        :disabled="zoomLevel <= minZoom"
-        title="Zoom out"
-        @click="zoomOut"
-      >
+      <button class="zoom-btn" :disabled="zoomLevel <= minZoom" title="Zoom out" @click="zoomOut">
         −
       </button>
     </div>
@@ -376,9 +370,7 @@ export default {
      * @param {string} robotName - The robot's name (used as data-robot-id)
      */
     scrollToRobot(robotName) {
-      const el = this.$refs.viewport?.querySelector(
-        `[data-robot-id="${robotName}"]`,
-      );
+      const el = this.$refs.viewport?.querySelector(`[data-robot-id="${robotName}"]`);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
       }

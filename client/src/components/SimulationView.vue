@@ -13,12 +13,7 @@
 
     <!-- Loaded state -->
     <template v-else>
-      <SimulationGrid
-        ref="grid"
-        :robots="robots"
-        :houses="houses"
-        :robot-count="robotCount"
-      />
+      <SimulationGrid ref="grid" :robots="robots" :houses="houses" :robot-count="robotCount" />
     </template>
   </div>
 </template>

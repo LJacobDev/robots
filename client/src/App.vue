@@ -83,7 +83,13 @@ import WelcomeScreen from './components/WelcomeScreen.vue';
 export default {
   name: 'App',
 
-  components: { ControlPanel, CreateSimulationModal, SimulationList, SimulationView, WelcomeScreen },
+  components: {
+    ControlPanel,
+    CreateSimulationModal,
+    SimulationList,
+    SimulationView,
+    WelcomeScreen,
+  },
 
   data() {
     return {
