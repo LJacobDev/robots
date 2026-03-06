@@ -6,7 +6,7 @@ My aim was to produce the highest quality and maintainable code, with documentat
 
 Making the project easy to work with and maintain was favoured over spending time on getting UI styles absolutely perfect.
 
-A spec-driven development workflow was used in order to make sure the project could move fast through planning and implementation phases while making sure that the end result adheres to what was intended.
+A spec-driven development workflow was used in order to make sure the project could move fast through planning and implementation phases while maintaining that the end result adheres to what was intended.
 
 AI tooling was intentionally leveraged to help me fill in features like thorough JSDoc comments, unit and integration tests, UX styles like shadow box and hover states, ARIA labels, and other such additions. The things that would normally invole extensive typing and manual toil while also having straightforward predictable outcomes, which LLMs are strong at helping with.
 
