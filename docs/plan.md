@@ -382,21 +382,21 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.8 Robot SVG Component
 
-- [ ] Create `RobotMarker.vue` — inline SVG robot icon (~15–20 lines)
+- [x] Create `RobotMarker.vue` — inline SVG robot icon (~15–20 lines)
   - Props: `color` (string, HSL or hex)
   - The SVG body fill uses the `color` prop
   - Small, recognizable robot shape (head, body, antenna — simple geometric shapes)
-- [ ] Export or save a static version of the SVG for use as the browser favicon (`client/public/favicon.svg` or similar)
-- [ ] Write component test for `RobotMarker.vue`: renders SVG with correct color prop
-- [ ] Verify: renders at various colors, scales reasonably at small sizes (grid marker ~20–30px)
+- [x] Export or save a static version of the SVG for use as the browser favicon (`client/public/favicon.svg` or similar)
+- [x] Write component test for `RobotMarker.vue`: renders SVG with correct color prop
+- [x] Verify: renders at various colors, scales reasonably at small sizes (grid marker ~20–30px)
 
 ### 2.9 House SVG Component
 
-- [ ] Create `HouseMarker.vue` — inline SVG gift box icon
+- [x] Create `HouseMarker.vue` — inline SVG gift box icon
   - Simple box with ribbon and bow, single fill color
   - Sized to match the grid cell scale
-- [ ] Write component test for `HouseMarker.vue`: renders SVG
-- [ ] Verify: renders clearly at grid cell size, visually distinct from robot markers
+- [x] Write component test for `HouseMarker.vue`: renders SVG
+- [x] Verify: renders clearly at grid cell size, visually distinct from robot markers
 
 ### 2.10 Simulation Grid
 
