@@ -87,3 +87,24 @@ During Step 1.6 implementation, the initial version of `runSimulation` collected
 **Decision:** `runSimulation` loops `stepSimulation` internally without collecting results. The route handler queries final state from the DB after the run completes.
 
 **Action:** Removed the `results` array from `runSimulation`. Updated tests to verify final state via repository queries instead of inspecting returned step objects.
+
+---
+
+## 2026-03-05 — Get Simulation Details as Primary Frontend Data Source
+
+During frontend spec planning, discovered that the frontend needs house coordinates for grid rendering, robot positions after each step, and total presents — all of which exist across separate endpoints. Evaluated several approaches for how the frontend should get state after each step/run.
+
+**Options considered:**
+
+1. **Multiple follow-up calls per step:** Call `getRobots()` + `getTotalPresents()` after each step, plus a hypothetical houses endpoint. Three API calls per button click.
+2. **Embed all data in step response:** Return robots + houses + totals in the step response payload. Makes the step endpoint heavy and diminishes the standalone endpoints.
+3. **Add houses to `GET /robots`:** Couples two data domains into one endpoint with a misleading name.
+4. **Single full-state refresh via `getSimulation(id)`:** Add `houses[]` to the existing Get Simulation Details response (§4.8), and call it after every step and run.
+
+**Decision:** Option 4. The `GET /simulations/:id` endpoint becomes the frontend's single full-state snapshot — called on initial load, when switching simulations, and after each step or run. The `houses[]` array was added to its response, providing house coordinates and present counts for grid rendering. The repository function `getHousesBySimulation()` already existed and just needed wiring into the route handler.
+
+This means the standalone endpoints (`GET /robots` §4.4, `GET /presents` §4.6) are not called by the frontend during its primary flow, but they remain implemented, tested, and available as the required operations they were specified to be. They serve direct API consumers (curl, scripts, other clients) and demonstrate that the requirements are fulfilled.
+
+**Tradeoff awareness:** At current scale (single human user, debounced button clicks), the full-state refresh adds negligible load — the query hits an indexed SQLite database with a small number of rows and executes in microseconds. At higher scale with many concurrent users or simulations with thousands of houses, a delta-based approach (updating only the changed data from the step response) would be more efficient. This is documented as a recommended optimization for future scaling and should be monitored for load as the application runs.
+
+**Action:** Updated spec §4.8 response shape to include `houses[]`. Updated spec §9.3 design decision. Updated plan step 2.13 to use `getSimulation(id)` as the single follow-up call for both step and run.

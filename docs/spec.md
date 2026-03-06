@@ -1,6 +1,6 @@
 # Robots Simulation — Specification
 
-## Version 1.0 — Backend API & Data Model
+## Version 1.0 — Backend API, Data Model & Frontend
 
 ---
 
@@ -8,7 +8,7 @@
 
 A web application that simulates robots delivering presents on an infinite 2D grid. Users create simulations with a configurable number of robots and a movement instruction string. Robots take turns executing moves in round-robin order, delivering presents to houses they visit — unless another robot already occupies that space.
 
-The backend exposes a RESTful API. The frontend (specified in a future version of this spec) provides a visual interface for creating, controlling, and observing simulations.
+The backend exposes a RESTful API. The frontend provides a visual interface for creating, controlling, and observing simulations.
 
 ---
 
@@ -375,7 +375,7 @@ Returns all simulations. Not in the original requirements but necessary for the 
 
 **`GET /api/v1/simulations/:id`**
 
-Returns full details for a single simulation including robots and house data.
+Returns full details for a single simulation including robots, houses, and delivery summary. This is the frontend's primary data-fetching endpoint — called on initial load, when switching simulations, and after each step or run to refresh the complete simulation state (see §9.3 for the frontend data strategy and scaling considerations).
 
 **Success response:** `200 OK`
 
@@ -395,6 +395,12 @@ Returns full details for a single simulation including robots and house data.
     { "name": "Jane", "turnOrder": 1, "position": { "x": -1, "y": 1 } },
     { "name": "Bob", "turnOrder": 2, "position": { "x": 1, "y": -1 } }
   ],
+  "houses": [
+    { "x": 0, "y": 1, "presentsCount": 2 },
+    { "x": -1, "y": 1, "presentsCount": 1 },
+    { "x": 0, "y": -1, "presentsCount": 1 },
+    { "x": 1, "y": -1, "presentsCount": 1 }
+  ],
   "summary": {
     "totalPresentsDelivered": 5,
     "housesWithPresents": 5
@@ -410,7 +416,7 @@ Returns full details for a single simulation including robots and house data.
 | 404    | SIMULATION_NOT_FOUND  | No simulation with this ID    |
 
 > **Design decision — endpoints beyond the minimum set:**
-> The requirements specify 6 operations (create, step, run, query robots, query houses by threshold, query total presents). Two additional endpoints have been added: List Simulations (4.7) and Get Simulation Details (4.8). List Simulations is necessary for any frontend — without it, a user who refreshes the page has no way to discover existing simulation IDs. Get Simulation Details combines simulation metadata, robot positions, and a present summary into a single response, avoiding the need for 3 separate API calls to render a simulation's full state. Both endpoints reuse existing repository functions and introduce no new database queries, so their implementation cost is negligible and they create no redundancy with the required endpoints.
+> The requirements specify 6 operations (create, step, run, query robots, query houses by threshold, query total presents). Two additional endpoints have been added: List Simulations (4.7) and Get Simulation Details (4.8). List Simulations is necessary for any frontend — without it, a user who refreshes the page has no way to discover existing simulation IDs. Get Simulation Details combines simulation metadata, robot positions, house coordinates with present counts, and a delivery summary into a single response. The frontend uses this as its primary data-fetching endpoint — called on initial load, when switching simulations, and after each step or run — so that it never needs to maintain its own simulation state. The required endpoints (Get Robots §4.4, Get Total Presents §4.6, Get Houses by Threshold §4.5) remain as focused, lightweight operations for direct API consumers. All endpoints reuse existing repository functions and introduce no redundancy.
 
 > **Design decision — API versioning:**
 > All routes are prefixed `/api/v1/`. If a breaking API change were needed in future, a `/api/v2/` router could be introduced alongside v1 without disrupting existing consumers, and v1 deprecated on a timeline.
@@ -467,16 +473,18 @@ In production, Express serves the Vite-built frontend from `dist/` and includes 
 
 ## 7. Tech Stack Summary
 
-| Layer    | Choice                              | Rationale                                                             |
-| -------- | ----------------------------------- | --------------------------------------------------------------------- |
-| Frontend | Vue 3.5+, Options API               | Team compatibility; Composition API noted as alternative              |
-| Bundler  | Vite                                | Standard for Vue 3; fast HMR in dev, optimized builds                 |
-| Backend  | Node.js + Express                   | Simple API endpoints; SSR not needed (Nuxt considered, rejected)      |
-| Language | JavaScript                          | TypeScript adds friction for this project's scope                     |
-| Database | SQLite via better-sqlite3           | Zero setup; repository pattern enables trivial Postgres migration     |
-| Testing  | Vitest + Supertest                  | Vitest for unit/integration tests; Supertest for HTTP-level API tests |
-| Linting  | ESLint v10 (flat config) + Prettier | Root-level config covering client + server                            |
-| Security | helmet.js + cors                    | Production-standard headers and origin control                        |
+| Layer    | Choice                              | Rationale                                                         |
+| -------- | ----------------------------------- | ----------------------------------------------------------------- |
+| Frontend | Vue 3.5+, Options API               | Team compatibility; Composition API noted as alternative          |
+| Bundler  | Vite                                | Standard for Vue 3; fast HMR in dev, optimized builds             |
+| Backend  | Node.js + Express                   | Simple API endpoints; SSR not needed (Nuxt considered, rejected)  |
+| Language | JavaScript                          | TypeScript adds friction for this project's scope                 |
+| Database | SQLite via better-sqlite3           | Zero setup; repository pattern enables trivial Postgres migration |
+| Testing  | Vitest + Supertest + Vue Test Utils | Unit, integration, and component tests                            |
+| Linting  | ESLint v10 (flat config) + Prettier | Root-level config covering client + server                        |
+| CSS      | autoprefixer via PostCSS            | Vendor prefix management without a CSS framework                  |
+| Security | helmet.js + cors                    | Production-standard headers and origin control                    |
+| Auditing | unlighthouse                        | Automated accessibility and performance auditing                  |
 
 > **Design decision — Express over Nuxt:**
 > Nuxt was considered since it unifies frontend and backend in a single framework. However, the application requires only a simple API and a single-page frontend — Nuxt's SSR, file-based routing, and auto-imports add complexity without corresponding benefit. Express is a well-understood, lightweight server that does exactly what is needed. If the application grew to need SEO or server-rendered pages, Nuxt would become the stronger choice.
@@ -486,3 +494,289 @@ In production, Express serves the Vite-built frontend from `dist/` and includes 
 
 > **Design decision — Options API over Composition API:**
 > The Composition API is the more modern Vue pattern and the developer's usual API of choice. However, the Options API was chosen for team compatibility, as it aligns with the conventions used by the reviewing team. Both APIs are fully supported in Vue 3.5+ and can coexist in the same project if needed.
+
+---
+
+## 8. Frontend Overview
+
+The frontend is a Vue 3.5+ single-page application that communicates with the backend API. It provides an interface for creating simulations, stepping or running them, visualizing robot movement on a 2D grid, and querying delivery statistics.
+
+The UI has two primary views:
+
+1. **Welcome / Create view** — shown when no simulation is selected. Displays a list of existing simulations and a creation form.
+2. **Simulation view** — shown when a simulation is selected. Displays the grid, robot positions, simulation controls, and statistics.
+
+The application is designed for desktop use but degrades gracefully on smaller screens.
+
+---
+
+## 9. Application Layout
+
+### 9.1 Three-Panel Structure
+
+| Region        | Width          | Contents                                                  |
+| ------------- | -------------- | --------------------------------------------------------- |
+| Left sidebar  | Fixed (~260px) | Create simulation button, simulation list (scrollable)    |
+| Center area   | Flexible       | Grid viewport (scrollable, zoomable)                      |
+| Right sidebar | Fixed (~280px) | Simulation controls, statistics, houses query, robot list |
+
+The left sidebar is always visible. The right sidebar appears only when a simulation is selected.
+
+### 9.2 Left Sidebar
+
+- **"Create Simulation" button** — opens the creation modal (§10).
+- **Simulation list** — vertical scrollable list of all simulations, showing ID, status badge, and move sequence (truncated). Clicking a simulation selects it and loads the simulation view.
+
+### 9.3 Right Sidebar (Control Panel)
+
+Visible when a simulation is selected. Contains, from top to bottom:
+
+1. **Simulation info** — ID, status badge (color-coded: created/running/completed), move sequence in monospace.
+2. **Step / Run controls** — "Step" and "Run" buttons side by side. Disabled when the simulation is completed or when an API call is in-flight.
+3. **Progress indicator** — Green progress bar showing `currentStep / totalSteps` as a percentage, with text label (e.g., "Step 3 of 6").
+4. **Statistics** — Robot count, total presents delivered (fetched from API on each step/run).
+5. **Houses query** — Number input for the threshold N, a "Check" button, and a result display area (e.g., "3 houses have ≥ 2 presents"). The result clears when any state change occurs (step or run).
+6. **Robot list** — Scrollable list showing each robot's name, color swatch, and current `(x, y)` position. Clicking a robot name scrolls the grid viewport to center on that robot's position.
+
+> **Design decision — "Check" button for houses query:**
+> The houses-by-threshold query is intentionally user-initiated rather than auto-fired on each step or run. This reflects its nature as an investigative tool — the user enters a specific threshold of interest and deliberately requests the count. Auto-firing on every state change would add API calls for data the user may not be looking at. The displayed result clears after a step or run to signal that it is a snapshot of a prior state, not a live counter. The word "Check" was chosen over "Query" (too technical) and "Update" (ambiguous — implies mutation).
+
+> **Design decision — frontend data strategy (single full-state refresh):**
+> After each step or run, the frontend calls `GET /api/v1/simulations/:id` (§4.8) to refresh the complete simulation state — robot positions, house coordinates, and delivery summary — in a single request. This means the frontend is fully stateless with respect to simulation data: it never tracks positions or present counts locally, and the backend is always the single source of truth. The required standalone endpoints (`GET /robots` §4.4, `GET /presents` §4.6) remain available for direct API consumers but the frontend does not call them during its primary step/run flow. At this application's scale — a single human user with debounced button clicks — the full-state refresh adds negligible load. At higher scale or with many concurrent users, a delta-based approach (updating only the moved robot's position from the step response and adding `totalPresents` to the step payload) would reduce bandwidth and query cost. This optimization is documented as a recommended improvement for future scaling. In the meantime, load on this endpoint should be monitored to identify when the full-state refresh pattern begins to warrant optimization.
+
+---
+
+## 10. Create Simulation Modal
+
+The creation form appears as a centered modal overlay on top of the grid area (or welcome screen). It contains:
+
+| Field         | Input type   | Notes                                                     |
+| ------------- | ------------ | --------------------------------------------------------- |
+| Robot count   | Number input | Defaults to 1. Validated: must be a positive integer.     |
+| Move sequence | Textarea     | Auto-expands up to a limit, then scrolls. Monospace font. |
+
+### 10.1 Move Sequence Input Behavior
+
+The move sequence textarea captures arrow key presses and converts them to directional characters (`^`, `V`, `<`, `>`), in addition to accepting those characters typed directly. This makes input more intuitive — users can press arrow keys to "draw" the path.
+
+Only valid characters (`^`, `V`, `v`, `<`, `>`) and standard editing keys (Backspace, Delete, arrow navigation, Ctrl+A/C/V/X/Z) are accepted. All other keystrokes are silently ignored. Lowercase `v` is accepted at the input level for usability; the backend normalizes it to `V`.
+
+### 10.2 Modal Interactions
+
+- **Submit:** Enter key or clicking a "Create" button. The modal closes on success and the new simulation is selected.
+- **Cancel:** Escape key or clicking outside the modal. Fields are cleared.
+- **Validation feedback:** Inline error messages (red text below the input) for invalid values. No submission occurs until inputs are valid.
+- **Loading state:** The "Create" button shows "Creating..." and is disabled during the API call.
+
+> **Design decision — modal over inline form:**
+> A modal was chosen over an inline form in the sidebar because the creation inputs (especially the textarea for move sequences) benefit from more horizontal space than the sidebar provides. The modal also provides a focused context that reduces the chance of accidental interaction with other controls during creation.
+
+---
+
+## 11. Grid Visualization
+
+### 11.1 Grid Architecture
+
+The grid represents the infinite 2D plane where robots move. Only cells that contain a robot or a delivered house are rendered as DOM elements. Empty grid cells are not rendered — the grid line pattern is drawn via a CSS background on the grid container.
+
+The grid container is sized dynamically to the bounding box of all occupied coordinates (robots + houses with delivered presents), plus padding. The center area acts as a scrollable viewport (`overflow: auto`) over this container.
+
+### 11.2 Robot Rendering
+
+Each robot is rendered as a small SVG icon positioned on the grid using CSS `transform: translate(x, y)`. Robots are visually distinguished by color, assigned via HSL hue spacing (`hue = (turnOrder / robotCount) * 360`).
+
+When multiple robots occupy the same cell, their SVG icons are stacked with a slight offset so that all are partially visible.
+
+### 11.3 House Rendering
+
+Houses that have received at least one present are rendered as a small gift-box SVG icon (a box with a ribbon and bow). Houses with no deliveries do not exist in the data and are not rendered — the grid background provides the visual structure for empty space.
+
+### 11.4 Zoom
+
+The grid supports zoom in and zoom out via `+` and `−` buttons positioned at a corner of the grid viewport. Zoom is implemented via CSS `transform: scale()` on the grid container. The zoom level is constrained to a reasonable range (e.g., 0.25× to 3×).
+
+Mouse wheel zoom (Ctrl+scroll) may be added as a polish item if time permits, but the button controls are the primary interface.
+
+### 11.5 Click-to-Scroll from Robot List
+
+Clicking a robot's name in the control panel scrolls the grid viewport to center on that robot's current position. This is implemented via `Element.scrollIntoView()` on the robot's SVG element, using the `{ behavior: 'smooth', block: 'center', inline: 'center' }` options. Each robot SVG carries a `data-robot-id` attribute for lookup.
+
+> **Design decision — translate positioning over CSS Grid placement:**
+> Robots and houses are positioned using `transform: translate()` rather than `grid-row` / `grid-column`. This was chosen because `translate` enables smooth CSS `transition` animations when robots move between cells, which `grid-row`/`grid-column` changes do not support. Even if animations are not implemented in v1, the positioning strategy is ready for them without refactoring.
+
+> **Design decision — sparse rendering over full grid:**
+> Rendering only occupied cells keeps DOM node count proportional to the number of robots and visited houses, not to the grid area. A 3-robot simulation that covers a 100×100 area might have ~20 house elements and 3 robot elements — not 10,000 empty cells. This is essential for large move sequences that produce far-reaching movement patterns.
+
+> **Design decision — CSS background for grid lines:**
+> Grid lines are drawn using a `repeating-linear-gradient` or `background-size` pattern on the grid container, rather than rendering border-styled elements for every cell. This produces grid lines across the entire visible area at zero DOM cost, regardless of how far the viewport is scrolled.
+
+> **Design decision — no robot tooltips:**
+> We considered adding hover tooltips on robot SVGs showing the robot's name. A `<title>` element inside the SVG would provide this for free on single robots. However, when multiple robots occupy the same cell, only the topmost SVG's tooltip would display, creating an inconsistent experience. Since robot names and colors are already paired in the sidebar robot list, and click-to-scroll provides a way to locate any robot, tooltips were omitted to avoid partial functionality.
+
+---
+
+## 12. Visual Design
+
+### 12.1 CSS Foundation
+
+The application uses a CSS custom properties design system for consistent theming:
+
+- **Colors:** Defined as CSS custom properties (`--color-primary`, `--color-surface`, `--color-text`, `--color-border`, etc.)
+- **Typography:** System font stack for body text; monospace for move sequences, coordinates, and code-like content.
+- **Spacing:** Consistent spacing scale (`--space-xs` through `--space-xl`).
+- **Radii, shadows, transitions:** Shared tokens for border-radius, box-shadow, and transition durations.
+
+A CSS reset (or normalize) is applied globally to ensure cross-browser consistency.
+
+### 12.2 Dark Mode
+
+Dark mode is supported via `prefers-color-scheme: dark` media query. The custom property values are swapped for dark variants (lighter text on darker backgrounds). This requires approximately 10–15 lines of CSS overriding the property values. No JavaScript toggle is needed — the application respects the user's OS preference.
+
+### 12.3 Visual Details
+
+- Buttons and cards have subtle `box-shadow` for depth.
+- Hover states shift color tokens slightly (e.g., a darker shade of the primary color).
+- `focus-visible` outlines are applied to all interactive elements for keyboard navigation.
+- Status badges use color coding: gray for "created", blue for "running", green for "completed".
+- Move sequences and coordinates are displayed in monospace font.
+- The overall aesthetic aims for a clean, functional "simulation control panel" feel — not a decorative or marketing-style design.
+
+### 12.4 Animations and Motion
+
+If `prefers-reduced-motion` is not set to `reduce`, subtle transitions are used:
+
+- Button hover/active state transitions.
+- Modal fade-in/out.
+- Robot position transitions when stepping (translate animation from old position to new position).
+- Progress bar width transitions.
+
+When `prefers-reduced-motion: reduce` is active, all transitions and animations are disabled via a blanket `*, *::before, *::after { transition: none !important; animation: none !important; }` rule.
+
+No animation adds delay to a user action — all are visual feedback that occurs after or alongside the action completing.
+
+> **Design decision — CSS custom properties over utility classes:**
+> Utility class frameworks (e.g., Tailwind CSS) were considered. While they speed up prototyping, they add a build dependency, increase HTML verbosity, and work against the assessment goal of demonstrating CSS understanding. Custom properties provide the same consistency benefits (single source of truth for design tokens) with standard CSS that any developer can read and modify without framework knowledge.
+
+> **Design decision — prefers-color-scheme over manual toggle:**
+> A manual dark/light toggle would require state management (localStorage + reactive variable). Respecting the OS preference via a media query achieves dark mode support with zero JavaScript, which aligns with the project's preference for simplicity. A manual toggle can be layered on later if needed.
+
+---
+
+## 13. Loading, Error, and Empty States
+
+### 13.1 Loading States
+
+Every view that fetches data has three possible states: **loading**, **empty**, and **populated**.
+
+- **Loading:** Shown immediately while the API call is in flight. Uses skeleton loaders (pulsing gray rectangles matching the layout of the content that will appear). This prevents layout shift when data arrives.
+- **Empty:** Shown when data returns successfully but has no items (e.g., no simulations created yet). Displays a friendly message with a call to action (e.g., "No simulations yet — create one to get started").
+- **Populated:** Normal display of returned data.
+
+For action buttons (Step, Run, Create), the button text changes during the API call ("Stepping...", "Running...", "Creating...") and the button is disabled to prevent duplicate submissions.
+
+### 13.2 Error States
+
+Errors from API calls are displayed inline, near the control that triggered them:
+
+- **Form validation errors:** Red border on the input + red text message below it.
+- **API errors:** Red text message displayed below the button or in a designated error area within the relevant panel.
+- **Optional:** A subtle CSS shake animation on the error message container to draw attention (disabled when `prefers-reduced-motion: reduce`).
+
+No toast notifications are used. Inline errors are more accessible (screen readers announce them in context) and do not require a notification management system.
+
+### 13.3 Client-Side Logging
+
+`console.error()` calls for failed API responses are gated behind `import.meta.env.DEV` so they are tree-shaken out of production builds. This keeps the production bundle clean while providing debugging information during development.
+
+> **Design decision — skeleton loaders over spinners:**
+> Skeleton loaders reserve the exact layout space of the incoming content, preventing Cumulative Layout Shift (CLS). Spinners provide no layout hint and cause content to "jump in" when data arrives. For a data-driven dashboard-style application, skeletons are the standard modern approach.
+
+> **Design decision — inline errors over toasts:**
+> Toast notifications require a notification management layer (queue, auto-dismiss timers, stacking logic) and present accessibility challenges (screen reader announcement timing, focus management). Inline errors appear in context next to the triggering control, are announced by screen readers naturally as part of the form, and require no additional infrastructure.
+
+---
+
+## 14. Accessibility & Performance
+
+### 14.1 Accessibility
+
+The application targets WCAG 2.1 Level AA compliance:
+
+- **Semantic HTML:** `<nav>`, `<main>`, `<aside>`, `<button>`, `<input>`, `<form>` used for their intended purposes. No `<div>` buttons.
+- **ARIA labels:** All interactive elements have accessible names. The grid viewport has `role="img"` with an `aria-label` describing the simulation state.
+- **Keyboard navigation:** Tab moves between major control groups (create button → simulation list → step button → run button → other controls). Arrow keys navigate within the simulation list. All interactive elements are reachable and operable without a mouse.
+- **Focus management:** `focus-visible` outlines on all focusable elements. When a modal opens, focus is trapped within it and returned to the trigger element on close.
+- **Color contrast:** All text/background combinations meet WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text).
+- **Live regions:** Status updates (step results, error messages) are announced to screen readers via `aria-live="polite"` regions.
+- **Reduced motion:** All animations and transitions respect `prefers-reduced-motion: reduce` (see §12.4).
+
+### 14.2 Performance Targets
+
+- **Bundle size:** Target < 50KB gzipped for all JavaScript and CSS (Vue + application code). Vue 3's tree-shaking and Vite's bundling make this achievable for a small application.
+- **Core Web Vitals awareness:**
+  - **LCP (Largest Contentful Paint):** The grid container or simulation list should paint within 2.5s. No external fonts or large images to block rendering.
+  - **CLS (Cumulative Layout Shift):** Skeleton loaders reserve space; no content shifts after data loads.
+  - **INP (Interaction to Next Paint):** All button clicks trigger immediate visual feedback (disabled state + text change). API responses update the UI without blocking the main thread.
+- **DOM efficiency:** Sparse grid rendering keeps node count proportional to occupied cells, not grid area (see §11.1).
+
+### 14.3 Development Tooling
+
+- **Vitest + Vue Test Utils** for component unit tests.
+- **unlighthouse** for automated accessibility and performance auditing across all pages.
+- **autoprefixer** via PostCSS for vendor prefix management.
+
+> **Design decision — desktop-first responsive design:**
+> The application is an interactive simulation dashboard with a three-panel layout, zoom controls, and a grid viewport. This is inherently a desktop experience. The CSS starts with the desktop layout and adds a mobile breakpoint that collapses sidebars for basic usability on smaller screens. This is the opposite of the typical mobile-first approach, but appropriate for the tool's nature — similar to how a code editor or design tool prioritizes the desktop experience.
+
+---
+
+## 15. Component Architecture
+
+### 15.1 Component Tree
+
+```
+App.vue
+├── SimulationList.vue          (left sidebar)
+├── CreateSimulationModal.vue   (modal overlay)
+├── WelcomeScreen.vue           (center, when no sim selected)
+└── SimulationView.vue          (center + right sidebar, when sim selected)
+    ├── SimulationGrid.vue      (grid viewport)
+    │   ├── RobotMarker.vue     (SVG robot icon, per robot)
+    │   └── HouseMarker.vue     (SVG gift box icon, per house)
+    └── ControlPanel.vue        (right sidebar)
+```
+
+### 15.2 Component Responsibilities
+
+| Component                   | Role                                                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `App.vue`                   | Layout shell. Holds selected simulation ID. Fetches simulation list.                                             |
+| `SimulationList.vue`        | Renders the list of simulations. Emits selection events.                                                         |
+| `CreateSimulationModal.vue` | Form inputs, validation, arrow key capture, API call to create.                                                  |
+| `WelcomeScreen.vue`         | Shown when no simulation is selected. Prompt to create or select.                                                |
+| `SimulationView.vue`        | Orchestrates grid and control panel. Fetches simulation details. Manages API calls for step/run/presents/houses. |
+| `SimulationGrid.vue`        | Renders the grid background, robot markers, and house markers. Handles zoom and scroll.                          |
+| `RobotMarker.vue`           | Single SVG robot icon. Props: color, x, y, robot ID.                                                             |
+| `HouseMarker.vue`           | Single SVG gift box icon. Props: x, y.                                                                           |
+| `ControlPanel.vue`          | Step/Run buttons, progress bar, stats, houses query input, robot list with click-to-scroll.                      |
+
+### 15.3 State Management
+
+There is no external state management library (Pinia, Vuex). State is managed via standard Vue Options API `data()` and `props`/`emits` between parent and child components.
+
+- **`App.vue`** owns: `selectedSimulationId`, `simulations[]` (the list).
+- **`SimulationView.vue`** owns: `simulation`, `robots[]`, `houses[]`, `totalPresents`, `houseQueryResult`, `loading` flags, `error` messages.
+
+This is sufficient because the component tree is shallow (max 3 levels deep) and there is no cross-branch state sharing that would warrant a store.
+
+> **Design decision — no Pinia/Vuex:**
+> State management libraries add value when state must be shared across deeply nested or sibling component trees. This application has a shallow hierarchy where the simulation view component naturally owns all simulation-related state and passes it down via props. Adding Pinia would introduce indirection (store files, action definitions, getter patterns) without solving any state-sharing problem that doesn't already have a simpler solution. If the component tree deepens significantly, Pinia could be introduced for specific state slices without refactoring existing components.
+
+> **Design decision — no Vue Router:**
+> The application has exactly two visual states: "no simulation selected" and "simulation selected." This binary is managed by a single reactive variable (`selectedSimulationId`). Vue Router would add URL-based navigation, which enables deep linking and browser back/forward support — but also requires route definitions, navigation guards, and the router dependency. For this application's scope, the trade-off favors simplicity. If deep linking becomes important (e.g., sharing a URL to a specific simulation), Vue Router can be added and the `selectedSimulationId` moved to a route parameter with minimal refactoring.
+
+---
+
+## 16. Robot SVG & Favicon
+
+A single SVG robot icon is used throughout the application: as robot markers on the grid, as color swatches in the robot list, and as the browser favicon. The SVG is approximately 15–20 lines and accepts a `color` prop for the body fill. The same SVG file (or an inline variant) is used as the favicon for visual branding consistency.

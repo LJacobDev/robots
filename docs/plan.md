@@ -234,3 +234,316 @@ Automated API tests cover the full HTTP request → route → service → reposi
 ---
 
 _Phases 2+ (Frontend UI, CSS grid visualization, polish, Docker, final review) will be planned after Phase 1 is complete and the spec is updated with frontend decisions._
+
+---
+
+## Phase 2 — Frontend: Vue SPA, Grid Visualization & Polish
+
+This phase delivers the complete frontend application per spec §8–§16. It builds on the fully working backend from Phase 1. Each step assumes the backend dev server is running on port 3000.
+
+---
+
+### 2.0 Backend Patch — Add Houses to Get Simulation Details
+
+The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data source. It needs to include house coordinates so the grid can render delivered presents. The repository function `getHousesBySimulation()` already exists — this step wires it into the route handler.
+
+- [ ] In `server/routes/simulations.js`, update the `GET /simulations/:id` handler to fetch houses via `getHousesBySimulation()` and include a `houses` array in the response (each entry: `{ x, y, presentsCount }`)
+- [ ] Update existing integration tests in `server/routes/simulations.test.js` to verify the `houses` array is present and correct in the `GET /simulations/:id` response
+- [ ] Update `docs/curl-examples.md` to show the new `houses` field in the example response
+- [ ] Verify: `npm test` passes, `GET /simulations/:id` returns houses after stepping or running
+
+### 2.1 Vue Project Scaffolding
+
+- [ ] Run `npm create vue@latest` inside the `client/` directory (no Router, no Pinia, no TypeScript, no JSX, with Vitest, with ESLint + Prettier — defer to root config)
+- [ ] Configure `vite.config.js`:
+  - Dev proxy: `/api` → `http://localhost:3000`
+  - `build.outDir`: `../dist` (root-level dist, per spec §6.4)
+  - `build.emptyOutDir`: true
+- [ ] Install `autoprefixer` and create `postcss.config.js`
+- [ ] Verify the root ESLint flat config covers `client/src/**` — adjust if needed
+- [ ] Add npm scripts to root `package.json`:
+  - `dev:client` — runs Vite dev server from `client/`
+  - `dev` — runs both `dev:server` and `dev:client` concurrently (or as instructions to run in two terminals)
+  - `build` — runs Vite build from `client/`
+- [ ] Add `dist/` to `.gitignore` if not already present
+- [ ] Remove Vue scaffold boilerplate (default App.vue content, HelloWorld, demo styles)
+- [ ] Verify: `npm run dev:client` starts Vite, proxied API calls to `http://localhost:5173/api/v1/simulations` return data from the backend
+
+### 2.2 CSS Foundation & Design Tokens
+
+- [ ] Create a CSS reset file (`client/src/assets/reset.css`) — box-sizing border-box, margin/padding reset, sensible defaults
+- [ ] Create `client/src/assets/variables.css` — all CSS custom properties:
+  - Color tokens (--color-primary, --color-surface, --color-text, --color-border, --color-error, --color-success, status badge colors)
+  - Typography (system font stack, monospace stack, font sizes)
+  - Spacing scale (--space-xs through --space-xl)
+  - Radii, shadows, transition durations
+- [ ] Add `prefers-color-scheme: dark` media query block that overrides color tokens with dark variants
+- [ ] Add `prefers-reduced-motion: reduce` blanket rule to disable all transitions and animations
+- [ ] Import reset and variables in `main.js` (or `main.css`) so they apply globally
+- [ ] Verify: page loads with reset applied, custom properties are visible in dev tools, dark mode toggles correctly when OS preference changes
+
+### 2.3 Application Layout Shell
+
+- [ ] Create `App.vue` with the three-panel layout structure:
+  - Left sidebar (`<aside>`, fixed ~260px)
+  - Center area (`<main>`, flexible)
+  - Right sidebar (`<aside>`, fixed ~280px, conditionally rendered)
+- [ ] Use CSS Grid or Flexbox for the three-panel layout
+- [ ] Add placeholder text in each panel region to verify sizing and scroll behavior
+- [ ] Add `selectedSimulationId` and `simulations` to `App.vue` data
+- [ ] Verify: three panels visible, center area fills remaining space, sidebars have correct widths
+
+### 2.4 API Client Module
+
+- [ ] Create `client/src/api/simulations.js` — one exported function per API endpoint:
+  - `createSimulation(robotCount, moveSequence)` → POST /api/v1/simulations
+  - `listSimulations()` → GET /api/v1/simulations
+  - `getSimulation(id)` → GET /api/v1/simulations/:id
+  - `stepSimulation(id)` → POST /api/v1/simulations/:id/step
+  - `runSimulation(id)` → POST /api/v1/simulations/:id/run
+  - `getRobots(id)` → GET /api/v1/simulations/:id/robots
+  - `getTotalPresents(id)` → GET /api/v1/simulations/:id/presents
+  - `getHousesByThreshold(id, minPresents)` → GET /api/v1/simulations/:id/houses?minPresents=N
+- [ ] Each function uses `fetch()`, checks `response.ok`, parses JSON, throws on error with the error body attached
+- [ ] Dev-only `console.error()` logging gated behind `import.meta.env.DEV`
+- [ ] JSDoc on each function
+- [ ] Verify: import a function in App.vue's `mounted()`, call `listSimulations()`, confirm data appears in console
+
+### 2.5 Simulation List (Left Sidebar)
+
+- [ ] Create `SimulationList.vue` component (Options API):
+  - Props: `simulations` (array), `selectedId` (number or null)
+  - Emits: `select` (simulation ID)
+  - Renders a scrollable list of simulation items
+  - Each item shows: simulation ID, status badge (colored span), move sequence (truncated, monospace)
+  - Active item is visually highlighted
+- [ ] Wire into `App.vue`: pass `simulations` and `selectedSimulationId` as props, handle `select` event
+- [ ] Fetch simulation list on `App.vue` mount via `listSimulations()` API call
+- [ ] Handle loading state (skeleton placeholders) and empty state ("No simulations yet")
+- [ ] Style: scrollable overflow, status badge colors (gray/blue/green), truncated text with ellipsis
+- [ ] Verify: list loads from API, clicking an item updates `selectedSimulationId`, active item highlights
+
+### 2.6 Welcome Screen
+
+- [ ] Create `WelcomeScreen.vue` — shown in center area when `selectedSimulationId` is null
+  - Friendly message: "Select a simulation or create a new one"
+  - Minimal styling, centered in the available space
+- [ ] Conditionally render `WelcomeScreen` vs `SimulationView` in `App.vue` based on `selectedSimulationId`
+- [ ] Verify: welcome screen shows on load, disappears when a simulation is selected, reappears when deselected
+
+### 2.7 Create Simulation Modal
+
+- [ ] Create `CreateSimulationModal.vue` component:
+  - Props: `visible` (boolean)
+  - Emits: `close`, `created` (new simulation data)
+  - Data: `robotCount` (default 1), `moveSequence` (empty string), `error` (null), `isSubmitting` (false)
+- [ ] Robot count: number input, validated >= 1
+- [ ] Move sequence: `<textarea>` with monospace font
+  - `@keydown` handler captures arrow keys → appends `^`, `V`, `<`, `>` and calls `preventDefault()`
+  - Allows only valid characters and editing keys; silently ignores all others
+  - Hint text below input explaining arrow key usage
+- [ ] Submit: calls `createSimulation()` API, emits `created` on success, shows inline error on failure
+- [ ] Loading state: button text "Creating...", disabled during API call
+- [ ] Cancel: Escape key or click-outside closes and resets fields
+- [ ] Focus trap: when modal opens, focus moves to first input; Tab cycles within modal; focus returns to trigger on close
+- [ ] Modal overlay: semi-transparent backdrop, centered card
+- [ ] Wire into `App.vue`:
+  - "Create Simulation" button in left sidebar opens modal
+  - On `created` event: add new simulation to list, select it, close modal
+- [ ] Verify: modal opens/closes, arrow keys produce move characters, submit creates simulation via API, new simulation appears in list and is selected
+
+### 2.8 Robot SVG Component
+
+- [ ] Create `RobotMarker.vue` — inline SVG robot icon (~15–20 lines)
+  - Props: `color` (string, HSL or hex)
+  - The SVG body fill uses the `color` prop
+  - Small, recognizable robot shape (head, body, antenna — simple geometric shapes)
+- [ ] Export or save a static version of the SVG for use as the browser favicon (`client/public/favicon.svg` or similar)
+- [ ] Verify: renders at various colors, scales reasonably at small sizes (grid marker ~20–30px)
+
+### 2.9 House SVG Component
+
+- [ ] Create `HouseMarker.vue` — inline SVG gift box icon
+  - Simple box with ribbon and bow, single fill color
+  - Sized to match the grid cell scale
+- [ ] Verify: renders clearly at grid cell size, visually distinct from robot markers
+
+### 2.10 Simulation Grid
+
+- [ ] Create `SimulationGrid.vue` component:
+  - Props: `robots` (array), `houses` (array), `robotCount` (number for color calculation)
+  - The grid container uses a CSS background pattern for grid lines (repeating-linear-gradient or background-size)
+  - Container is sized to the bounding box of all robots + houses, plus padding
+- [ ] Position robot markers using `transform: translate()` based on grid coordinates
+  - Coordinate-to-pixel conversion: `(x * cellSize, -y * cellSize)` (y-axis inverted so `^` goes visually up)
+  - Each robot SVG has a `data-robot-id` attribute
+- [ ] Position house markers using the same translate approach
+- [ ] Handle stacked robots: when multiple robots share a cell, offset each SVG slightly so all are partially visible
+- [ ] Wrap grid container in a viewport div with `overflow: auto` for scrolling
+- [ ] Verify: robots and houses render at correct positions, grid lines visible, scrolling works when content overflows
+
+### 2.11 Zoom Controls
+
+- [ ] Add `+` and `−` buttons to a corner of the grid viewport (absolute positioned over the viewport)
+- [ ] Zoom state: `zoomLevel` in component data (default 1.0, min 0.25, max 3.0)
+- [ ] Apply zoom via `transform: scale()` on the grid container (combined with any existing transforms)
+- [ ] Verify: clicking + zooms in, clicking − zooms out, grid remains scrollable at all zoom levels
+
+### 2.12 Simulation View & Control Panel
+
+- [ ] Create `SimulationView.vue` component:
+  - Props: `simulationId` (number)
+  - Fetches simulation details via `getSimulation(id)` on mount and when `simulationId` changes (via `watch`)
+  - Owns: `simulation`, `robots`, `houses`, `totalPresents`, `houseQueryResult`, loading/error state
+  - Renders `SimulationGrid` (center) and `ControlPanel` (right sidebar)
+- [ ] Create `ControlPanel.vue` component:
+  - Props: `simulation`, `robots`, `totalPresents`, `houseQueryResult`, `isStepLoading`, `isRunLoading`
+  - Emits: `step`, `run`, `check-houses` (with threshold N), `scroll-to-robot` (with robot ID)
+- [ ] Simulation info section: ID, status badge, move sequence (monospace)
+- [ ] Step / Run buttons: emit events to parent, disabled when completed or loading
+  - Button text changes during loading: "Stepping..." / "Running..."
+- [ ] Progress bar: green bar width = `(currentStep / totalSteps) * 100%`, text label "Step X of Y"
+  - Smooth width transition (respects prefers-reduced-motion)
+- [ ] Verify: selecting a simulation loads its data, step/run buttons work, progress bar updates
+
+### 2.13 Step & Run API Integration
+
+Both step and run follow the same pattern: perform the action, then refresh full state via `getSimulation(id)`. This keeps the frontend stateless — no local tracking of positions or present counts.
+
+- [ ] In `SimulationView.vue`, create a shared `refreshSimulation()` method:
+  1. Call `getSimulation(id)` API
+  2. Update `simulation`, `robots`, `houses`, and `totalPresents` from response
+  3. Clear `houseQueryResult` (snapshot invalidated by state change)
+  4. Update the simulation's status in the sidebar list
+- [ ] Implement `step` handler:
+  1. Set `isStepLoading` = true, disable buttons
+  2. Call `stepSimulation(id)` API
+  3. On success: call `refreshSimulation()`
+  4. On error: display inline error message
+  5. Set `isStepLoading` = false
+- [ ] Implement `run` handler:
+  1. Set `isRunLoading` = true, disable buttons
+  2. Call `runSimulation(id)` API
+  3. On success: call `refreshSimulation()`
+  4. On error: display inline error message
+  5. Set `isRunLoading` = false
+- [ ] Verify: stepping updates grid positions one at a time, running completes all steps, completed simulation disables buttons
+
+### 2.14 Statistics & Houses Query
+
+- [ ] In `ControlPanel.vue`, display:
+  - Robot count (from simulation.robotCount)
+  - Total presents delivered (from `totalPresents` prop, sourced from `getSimulation` response summary)
+- [ ] Houses query section:
+  - Number input for threshold N (validated >= 1)
+  - "Check" button, emits `check-houses` with N
+  - Result area shows "X houses have ≥ N presents" or empty when cleared
+- [ ] In `SimulationView.vue`, handle `check-houses` event:
+  - Call `getHousesByThreshold(id, N)` API
+  - Set `houseQueryResult` with the response
+- [ ] Verify: total presents updates after each step/run, houses query returns correct count, result clears after step/run
+
+### 2.15 Click-to-Scroll from Robot List
+
+- [ ] In `ControlPanel.vue`, robot list shows each robot's name, color swatch (small robot SVG or colored dot), and `(x, y)` position
+- [ ] Clicking a robot name emits `scroll-to-robot` with the robot's ID
+- [ ] In `SimulationView.vue`, handle `scroll-to-robot`:
+  - Find the robot SVG in the grid via `document.querySelector([data-robot-id="..."])`
+  - Call `.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })`
+- [ ] Verify: clicking a robot name scrolls the grid to center on that robot
+
+### 2.16 Loading, Empty, and Error States
+
+- [ ] Simulation list: skeleton loader while fetching, "No simulations yet — create one to get started" when empty
+- [ ] Simulation view: skeleton loader while fetching simulation details
+- [ ] Action buttons: text changes ("Stepping...", "Running...", "Creating...") + disabled during in-flight API calls
+- [ ] API error messages: displayed inline in red text near the triggering control
+- [ ] Form validation errors: red border on input + red text below
+- [ ] Verify: each state is visually distinct, no layout shift when transitioning between states
+
+### 2.17 Accessibility Pass
+
+- [ ] Semantic HTML audit: `<nav>`, `<main>`, `<aside>`, `<button>`, `<form>`, `<input>` used correctly — no `<div>` buttons
+- [ ] ARIA labels on all interactive elements, including the grid viewport (`role="img"`, `aria-label`)
+- [ ] `aria-live="polite"` on status update regions (step result messages, error messages)
+- [ ] Focus management: modal focus trap (focus moves to first input on open, returns to trigger on close)
+- [ ] Keyboard navigation: Tab between major control groups, arrow keys within simulation list
+- [ ] `focus-visible` outlines on all focusable elements
+- [ ] Color contrast check: verify all text/background combinations meet WCAG AA (4.5:1 normal, 3:1 large)
+- [ ] Verify: navigate the entire app using only the keyboard, screen reader announces status changes
+
+### 2.18 Visual Polish & Animations
+
+- [ ] Button hover/active state transitions
+- [ ] Modal fade-in/out transition
+- [ ] Robot position transitions (translate animation on step)
+- [ ] Progress bar width transition
+- [ ] Confirm all transitions are disabled under `prefers-reduced-motion: reduce`
+- [ ] Status badge styling: gray (created), blue (running), green (completed) with rounded pill shape
+- [ ] Box shadows on buttons, cards, and sidebar panels
+- [ ] Mobile breakpoint: collapse sidebars on small screens (basic usability, not a primary target)
+- [ ] Verify: animations are smooth, no janky layout shifts, reduced motion preference is respected
+
+### 2.19 Frontend Testing
+
+- [ ] Install `@vue/test-utils` as dev dependency
+- [ ] API client tests (`client/src/api/__tests__/simulations.test.js`):
+  - Mock `fetch` and verify each function makes the correct request (method, URL, body)
+  - Verify error handling: non-ok response throws with error body
+- [ ] Component tests (using Vitest + Vue Test Utils):
+  - `SimulationList.vue`: renders items, emits select on click, shows empty state, shows loading state
+  - `CreateSimulationModal.vue`: renders form, validates input, captures arrow keys, emits created on submit, emits close on cancel/escape
+  - `ControlPanel.vue`: renders stats, disables buttons when completed, emits step/run/check-houses events
+  - `RobotMarker.vue`: renders SVG with correct color prop
+  - `HouseMarker.vue`: renders SVG
+  - `SimulationGrid.vue`: positions markers correctly, applies zoom
+- [ ] Add `test:client` script to root `package.json` (runs Vitest from `client/`)
+- [ ] Update root `test` script to run both server and client tests
+- [ ] Verify: all component tests pass, `npm test` runs full suite (server + client)
+
+### 2.20 Build & Production Serving
+
+- [ ] Run `npm run build` — Vite outputs to root `/dist/`
+- [ ] Verify Express serves the built frontend in production mode:
+  - Set `NODE_ENV=production`
+  - Start server with `node server/server.js`
+  - Visit `http://localhost:3000` — app loads
+  - API calls from the frontend reach the backend
+  - Navigating directly to any URL serves `index.html` (SPA catch-all)
+- [ ] Check bundle size: target < 50KB gzipped for JS + CSS
+- [ ] Add `start` script to root `package.json`: `NODE_ENV=production node server/server.js`
+
+### 2.21 Docker Setup
+
+- [ ] Create `Dockerfile`:
+  - Multi-stage build: Node image → install deps → build client → production image with server + dist
+  - Expose PORT
+  - CMD: `node server/server.js`
+- [ ] Create `.dockerignore` (node_modules, .env, data/\*.db, .git)
+- [ ] Create `docker-compose.yml` (optional, for easy `docker compose up`)
+- [ ] Verify: `docker build` succeeds, `docker run` starts the app, app is fully functional in the container
+- [ ] Verify: works on a clean environment (no host node_modules or .env assumed)
+
+### 2.22 README.md
+
+- [ ] Write `README.md` per spec structure:
+  - **How to run it** — npm setup, Docker alternative, environment variables
+  - **Things to try out** — example workflows (create simulation, step through it, run to completion, query houses)
+  - **Description of the API** — summary table of endpoints with link to `docs/curl-examples.md` for details
+  - **Reference** — link to `docs/spec.md` for full specification
+- [ ] Keep it clear, concise, and free of unnecessary clutter
+- [ ] Verify: a reader unfamiliar with the project can follow the instructions to run the app
+
+### 2.23 Phase 2 Checkpoint Review
+
+- [ ] Full app walkthrough: create simulation → step through → run → query houses → query presents → select different simulation — all flows work end to end
+- [ ] All tests pass: `npm test` runs server unit/integration + client component tests
+- [ ] Lint clean: `npm run lint` passes with no warnings or errors
+- [ ] Format clean: `npm run format` produces no changes
+- [ ] Accessibility audit: run unlighthouse or manual keyboard/screen reader walkthrough
+- [ ] Production build works: `npm run build && npm start` serves the full app
+- [ ] Docker build works: `docker build` and `docker run` produce a working app
+- [ ] Spec alignment: verify the running app matches every detail in spec.md §8–§16
+- [ ] Code review pass: JSDoc on all exported functions and components, consistent formatting, no dead code
+- [ ] README is complete and accurate
+- [ ] `docs/findings-decisions-actions.md` is up to date with any deviations discovered during implementation
