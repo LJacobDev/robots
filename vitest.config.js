@@ -1,5 +1,4 @@
 import { defineConfig } from 'vitest/config';
-import vue from '@vitejs/plugin-vue';
 
 export default defineConfig({
   test: {
@@ -11,19 +10,7 @@ export default defineConfig({
           environment: 'node',
         },
       },
-      {
-        plugins: [vue()],
-        resolve: {
-          alias: {
-            '@': new URL('./client/src', import.meta.url).pathname,
-          },
-        },
-        test: {
-          name: 'client',
-          include: ['client/src/**/*.test.js'],
-          environment: 'node',
-        },
-      },
+      'client',
     ],
   },
 });

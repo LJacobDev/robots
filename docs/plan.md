@@ -320,33 +320,33 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.5 Simulation List (Left Sidebar)
 
-- [ ] Create `SimulationList.vue` component (Options API):
+- [x] Create `SimulationList.vue` component (Options API):
   - Props: `simulations` (array), `selectedId` (number or null)
   - Emits: `select` (simulation ID)
   - Renders a scrollable list of simulation items
   - Each item shows: simulation ID, status badge (colored span), move sequence (truncated, monospace)
   - Active item is visually highlighted
-- [ ] Wire into `App.vue`: pass `simulations` and `selectedSimulationId` as props, handle `select` event
-- [ ] Fetch simulation list on `App.vue` mount via `listSimulations()` API call
-- [ ] Handle loading state (skeleton placeholders) and empty state ("No simulations yet")
-- [ ] Style: scrollable overflow, status badge colors (gray/blue/green), truncated text with ellipsis
-- [ ] Write component tests for `SimulationList.vue`:
+- [x] Wire into `App.vue`: pass `simulations` and `selectedSimulationId` as props, handle `select` event
+- [x] Fetch simulation list on `App.vue` mount via `listSimulations()` API call
+- [x] Handle loading state (skeleton placeholders) and empty state ("No simulations yet")
+- [x] Style: scrollable overflow, status badge colors (gray/blue/green), truncated text with ellipsis
+- [x] Write component tests for `SimulationList.vue`:
   - Renders one list item per simulation with ID, status badge, and truncated move sequence
   - Emits `select` with the simulation ID when an item is clicked
   - Highlights the active item when `selectedId` matches
   - Shows empty state message when `simulations` array is empty
   - Shows skeleton placeholders when in loading state
   - Status badge color matches simulation status (gray/blue/green)
-- [ ] Write component test for `WelcomeScreen.vue`: renders message text
-- [ ] Verify: list loads from API, clicking an item updates `selectedSimulationId`, active item highlights
+- [x] Write component test for `WelcomeScreen.vue`: renders message text
+- [x] Verify: list loads from API, clicking an item updates `selectedSimulationId`, active item highlights
 
 ### 2.6 Welcome Screen
 
-- [ ] Create `WelcomeScreen.vue` — shown in center area when `selectedSimulationId` is null
+- [x] Create `WelcomeScreen.vue` — shown in center area when `selectedSimulationId` is null
   - Friendly message: "Select a simulation or create a new one"
   - Minimal styling, centered in the available space
-- [ ] Conditionally render `WelcomeScreen` vs `SimulationView` in `App.vue` based on `selectedSimulationId`
-- [ ] Verify: welcome screen shows on load, disappears when a simulation is selected, reappears when deselected
+- [x] Conditionally render `WelcomeScreen` vs `SimulationView` in `App.vue` based on `selectedSimulationId`
+- [x] Verify: welcome screen shows on load, disappears when a simulation is selected, reappears when deselected
 
 ### 2.7 Create Simulation Modal
 
@@ -506,6 +506,7 @@ Both step and run follow the same pattern: perform the action, then refresh full
 ### 2.16 Loading, Empty, and Error States
 
 - [ ] Simulation list: skeleton loader while fetching, "No simulations yet — create one to get started" when empty
+- [ ] **Simulation list fetch error:** If `listSimulations()` fails on mount, show an inline "Could not load simulations" message with a retry action in the sidebar — not a silent empty state. (See `App.vue fetchSimulations()` — currently only logs in dev mode.)
 - [ ] Simulation view: skeleton loader while fetching simulation details
 - [ ] Action buttons: text changes ("Stepping...", "Running...", "Creating...") + disabled during in-flight API calls
 - [ ] API error messages: displayed inline in red text near the triggering control

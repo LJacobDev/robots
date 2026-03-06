@@ -3,16 +3,19 @@
     <div class="app-layout" :class="{ 'has-right-sidebar': selectedSimulationId }">
       <aside class="sidebar-left">
         <h2 class="sidebar-title">Simulations</h2>
-        <p class="placeholder-text">Simulation list goes here</p>
+        <SimulationList
+          :simulations="simulations"
+          :selected-id="selectedSimulationId"
+          :loading="loadingList"
+          @select="selectSimulation"
+        />
       </aside>
 
       <main class="center-area">
         <template v-if="selectedSimulationId">
           <p class="placeholder-text">Grid goes here (simulation {{ selectedSimulationId }})</p>
         </template>
-        <template v-else>
-          <p class="placeholder-text">Welcome screen goes here</p>
-        </template>
+        <WelcomeScreen v-else />
       </main>
 
       <aside v-if="selectedSimulationId" class="sidebar-right">
@@ -24,9 +27,22 @@
 </template>
 
 <script>
-import { listSimulations } from './api/simulations';
+import { listSimulations } from './api/simulations.js';
+import SimulationList from './components/SimulationList.vue';
+import WelcomeScreen from './components/WelcomeScreen.vue';
+
+/**
+ * Root application component.
+ *
+ * Manages the three-panel layout, owns the simulation list and
+ * selected simulation state, and fetches the simulation list on mount.
+ *
+ * @component
+ */
 export default {
   name: 'App',
+
+  components: { SimulationList, WelcomeScreen },
 
   data() {
     return {
@@ -34,11 +50,43 @@ export default {
       selectedSimulationId: null,
       /** @type {Array} List of all simulations */
       simulations: [],
+      /** Whether the simulation list is currently loading */
+      loadingList: true,
     };
   },
+
   async mounted() {
-    const data = await listSimulations();
-    console.log('Simulations from API: ', data);
+    await this.fetchSimulations();
+  },
+
+  methods: {
+    /**
+     * Fetches the simulation list from the API and updates state.
+     * Sets loadingList to false when complete, whether successful or not.
+     */
+    async fetchSimulations() {
+      this.loadingList = true;
+      try {
+        const data = await listSimulations();
+        this.simulations = data.simulations;
+      } catch (err) {
+        if (import.meta.env.DEV) {
+          console.error('[App] Failed to fetch simulations:', err);
+        }
+        this.simulations = [];
+      } finally {
+        this.loadingList = false;
+      }
+    },
+
+    /**
+     * Selects a simulation by ID.
+     *
+     * @param {number} id - The simulation ID to select
+     */
+    selectSimulation(id) {
+      this.selectedSimulationId = id;
+    },
   },
 };
 </script>
