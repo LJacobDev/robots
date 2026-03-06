@@ -273,27 +273,28 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.2 CSS Foundation & Design Tokens
 
-- [ ] Create a CSS reset file (`client/src/assets/reset.css`) — box-sizing border-box, margin/padding reset, sensible defaults
-- [ ] Create `client/src/assets/variables.css` — all CSS custom properties:
+- [x] Create a CSS reset file (`client/src/assets/reset.css`) — box-sizing border-box, margin/padding reset, sensible defaults
+- [x] Create `client/src/assets/variables.css` — all CSS custom properties:
   - Color tokens (--color-primary, --color-surface, --color-text, --color-border, --color-error, --color-success, status badge colors)
   - Typography (system font stack, monospace stack, font sizes)
   - Spacing scale (--space-xs through --space-xl)
   - Radii, shadows, transition durations
-- [ ] Add `prefers-color-scheme: dark` media query block that overrides color tokens with dark variants
-- [ ] Add `prefers-reduced-motion: reduce` blanket rule to disable all transitions and animations
-- [ ] Import reset and variables in `main.js` (or `main.css`) so they apply globally
-- [ ] Verify: page loads with reset applied, custom properties are visible in dev tools, dark mode toggles correctly when OS preference changes
+  - Layout dimensions (--sidebar-left-width, --sidebar-right-width)
+- [x] Add `prefers-color-scheme: dark` media query block that overrides color tokens with dark variants
+- [x] Add `prefers-reduced-motion: reduce` blanket rule to disable all transitions and animations
+- [x] Import reset and variables in `main.js` (or `main.css`) so they apply globally
+- [x] Verify: page loads with reset applied, custom properties are visible in dev tools, dark mode toggles correctly when OS preference changes
 
 ### 2.3 Application Layout Shell
 
-- [ ] Create `App.vue` with the three-panel layout structure:
+- [x] Create `App.vue` with the three-panel layout structure:
   - Left sidebar (`<aside>`, fixed ~260px)
   - Center area (`<main>`, flexible)
   - Right sidebar (`<aside>`, fixed ~280px, conditionally rendered)
-- [ ] Use CSS Grid or Flexbox for the three-panel layout
-- [ ] Add placeholder text in each panel region to verify sizing and scroll behavior
-- [ ] Add `selectedSimulationId` and `simulations` to `App.vue` data
-- [ ] Verify: three panels visible, center area fills remaining space, sidebars have correct widths
+- [x] Use CSS Grid for the three-panel layout (centered in a 90% viewport frame with border, rounded corners, shadow)
+- [x] Add placeholder text in each panel region to verify sizing and scroll behavior
+- [x] Add `selectedSimulationId` and `simulations` to `App.vue` data
+- [x] Verify: three panels visible, center area fills remaining space, sidebars have correct widths
 
 ### 2.4 API Client Module
 
