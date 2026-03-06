@@ -1,6 +1,11 @@
 <template>
   <div class="grid-wrapper">
-    <div ref="viewport" class="grid-viewport" role="img" aria-label="Simulation grid showing robot and house positions">
+    <div
+      ref="viewport"
+      class="grid-viewport"
+      role="img"
+      aria-label="Simulation grid showing robot and house positions"
+    >
       <div class="grid-container" :style="containerStyle">
         <!-- Origin crosshair -->
         <div class="origin-marker" :style="originStyle">
@@ -8,15 +13,17 @@
         </div>
 
         <!-- House markers -->
-        <div
-          v-for="house in houses"
-          :key="`house-${house.x}-${house.y}`"
-          class="grid-entity"
-          :style="entityStyle(house.x, house.y)"
-          :title="`House (${house.x}, ${house.y}) — ${house.presentsCount} present${house.presentsCount !== 1 ? 's' : ''}`"
-        >
-          <HouseMarker :size="markerSize" />
-        </div>
+        <TransitionGroup name="house">
+          <div
+            v-for="house in houses"
+            :key="`house-${house.x}-${house.y}`"
+            class="grid-entity"
+            :style="entityStyle(house.x, house.y)"
+            :title="`House (${house.x}, ${house.y}) — ${house.presentsCount} present${house.presentsCount !== 1 ? 's' : ''}`"
+          >
+            <HouseMarker :size="markerSize" />
+          </div>
+        </TransitionGroup>
 
         <!-- Robot markers -->
         <div
@@ -38,11 +45,23 @@
 
     <!-- Zoom controls (outside scrollable viewport so they stay fixed) -->
     <div class="zoom-controls">
-      <button class="zoom-btn" :disabled="zoomLevel >= maxZoom" title="Zoom in" aria-label="Zoom in" @click="zoomIn">
+      <button
+        class="zoom-btn"
+        :disabled="zoomLevel >= maxZoom"
+        title="Zoom in"
+        aria-label="Zoom in"
+        @click="zoomIn"
+      >
         +
       </button>
       <span class="zoom-label" aria-live="polite">{{ zoomPercent }}%</span>
-      <button class="zoom-btn" :disabled="zoomLevel <= minZoom" title="Zoom out" aria-label="Zoom out" @click="zoomOut">
+      <button
+        class="zoom-btn"
+        :disabled="zoomLevel <= minZoom"
+        title="Zoom out"
+        aria-label="Zoom out"
+        @click="zoomOut"
+      >
         −
       </button>
     </div>
@@ -408,6 +427,14 @@ export default {
   top: 0;
   left: 0;
   pointer-events: auto;
+}
+
+.house-enter-active {
+  transition: opacity 0.3s ease;
+}
+
+.house-enter-from {
+  opacity: 0;
 }
 
 [data-robot-id] {

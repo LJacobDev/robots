@@ -98,6 +98,7 @@
     <!-- Robot list -->
     <section class="panel-section">
       <h3 class="section-title">Robots</h3>
+      <p style="font-size: var(--text-sm)">Click on a robot's name to scroll to its position</p>
       <ul class="robot-list">
         <li
           v-for="robot in robots"
