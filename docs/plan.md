@@ -291,14 +291,14 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - Left sidebar (`<aside>`, fixed ~260px)
   - Center area (`<main>`, flexible)
   - Right sidebar (`<aside>`, fixed ~280px, conditionally rendered)
-- [x] Use CSS Grid for the three-panel layout (centered in a 90% viewport frame with border, rounded corners, shadow)
+- [x] Use CSS Grid for the three-panel layout (centered in a 80% viewport frame with border, rounded corners, shadow)
 - [x] Add placeholder text in each panel region to verify sizing and scroll behavior
 - [x] Add `selectedSimulationId` and `simulations` to `App.vue` data
 - [x] Verify: three panels visible, center area fills remaining space, sidebars have correct widths
 
 ### 2.4 API Client Module
 
-- [ ] Create `client/src/api/simulations.js` — one exported function per API endpoint:
+- [x] Create `client/src/api/simulations.js` — one exported function per API endpoint:
   - `createSimulation(robotCount, moveSequence)` → POST /api/v1/simulations
   - `listSimulations()` → GET /api/v1/simulations
   - `getSimulation(id)` → GET /api/v1/simulations/:id
@@ -307,16 +307,16 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - `getRobots(id)` → GET /api/v1/simulations/:id/robots
   - `getTotalPresents(id)` → GET /api/v1/simulations/:id/presents
   - `getHousesByThreshold(id, minPresents)` → GET /api/v1/simulations/:id/houses?minPresents=N
-- [ ] Each function uses `fetch()`, checks `response.ok`, parses JSON, throws on error with the error body attached
-- [ ] Dev-only `console.error()` logging gated behind `import.meta.env.DEV`
-- [ ] JSDoc on each function
-- [ ] Install `@vue/test-utils` as dev dependency (needed for component tests in later steps)
-- [ ] Configure Vitest to cover both `server/` and `client/src/` from the root config so `npm test` runs everything
-- [ ] Ensure `test:watch` script is available for continuous testing during development
-- [ ] Write API client unit tests (`client/src/api/__tests__/simulations.test.js`):
+- [x] Each function uses `fetch()`, checks `response.ok`, parses JSON, throws on error with the error body attached
+- [x] Dev-only `console.error()` logging gated behind `import.meta.env.DEV`
+- [x] JSDoc on each function
+- [x] Install `@vue/test-utils` as dev dependency (needed for component tests in later steps)
+- [x] Configure Vitest to cover both `server/` and `client/src/` from the root config so `npm test` runs everything (vitest.config.js with two projects: server + client)
+- [x] Ensure `test:watch` script is available for continuous testing during development
+- [x] Write API client unit tests (`client/src/api/__tests__/simulations.test.js`):
   - Mock `fetch` and verify each function makes the correct request (method, URL, body)
   - Verify error handling: non-ok response throws with error body
-- [ ] Verify: import a function in App.vue's `mounted()`, call `listSimulations()`, confirm data appears in console
+- [x] Verify: import a function in App.vue's `mounted()`, call `listSimulations()`, confirm data appears in console
 
 ### 2.5 Simulation List (Left Sidebar)
 

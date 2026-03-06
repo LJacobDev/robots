@@ -15,6 +15,14 @@ export default [
   // Vue plugin rules for .vue files
   ...pluginVue.configs['flat/recommended'],
 
+  // Root config files: Node.js globals
+  {
+    files: ['*.config.js'],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+
   // Server files: Node.js globals
   {
     files: ['server/**/*.js'],
@@ -28,6 +36,17 @@ export default [
     files: ['client/**/*.js', 'client/**/*.vue'],
     languageOptions: {
       globals: globals.browser,
+    },
+  },
+
+  // Test files: Vitest globals + Node globals (for globalThis, vi, etc.)
+  {
+    files: ['**/*.test.js'],
+    languageOptions: {
+      globals: {
+        ...globals.node,
+        globalThis: 'readonly',
+      },
     },
   },
 

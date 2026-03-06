@@ -24,6 +24,7 @@
 </template>
 
 <script>
+import { listSimulations } from './api/simulations';
 export default {
   name: 'App',
 
@@ -34,6 +35,10 @@ export default {
       /** @type {Array} List of all simulations */
       simulations: [],
     };
+  },
+  async mounted() {
+    const data = await listSimulations();
+    console.log('Simulations from API: ', data);
   },
 };
 </script>
