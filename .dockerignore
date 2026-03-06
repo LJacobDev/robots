@@ -1,0 +1,16 @@
+node_modules/
+dist/
+coverage/
+.env
+.git/
+.gitignore
+.nvmrc
+.prettierrc
+*.db
+*.db-shm
+*.db-wal
+*.log
+docs/
+AGENTS.md
+CLAUDE.md
+eslint.config.js

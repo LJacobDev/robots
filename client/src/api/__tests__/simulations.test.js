@@ -166,9 +166,7 @@ describe('getHousesByThreshold', () => {
 
     const result = await getHousesByThreshold(1, 3);
 
-    expect(globalThis.fetch).toHaveBeenCalledWith(
-      '/api/v1/simulations/1/houses?minPresents=3'
-    );
+    expect(globalThis.fetch).toHaveBeenCalledWith('/api/v1/simulations/1/houses?minPresents=3');
     expect(result).toEqual(responseBody);
   });
 });

@@ -547,26 +547,25 @@ All component and API client tests were written alongside their implementation s
 
 ### 2.20 Build & Production Serving
 
-- [ ] Run `npm run build` — Vite outputs to root `/dist/`
-- [ ] Verify Express serves the built frontend in production mode:
+- [x] Run `npm run build` — Vite outputs to root `/dist/`
+- [x] Verify Express serves the built frontend in production mode:
   - Set `NODE_ENV=production`
   - Start server with `node server/server.js`
   - Visit `http://localhost:3000` — app loads
   - API calls from the frontend reach the backend
   - Navigating directly to any URL serves `index.html` (SPA catch-all)
-- [ ] Check bundle size: target < 50KB gzipped for JS + CSS
-- [ ] Add `start` script to root `package.json`: `NODE_ENV=production node server/server.js`
+- [-] Check bundle size: target < 50KB gzipped for JS + CSS
+- [x] Add `start` script to root `package.json`: `NODE_ENV=production node server/server.js`
 
 ### 2.21 Docker Setup
 
-- [ ] Create `Dockerfile`:
+- [x] Create `Dockerfile`:
   - Multi-stage build: Node image → install deps → build client → production image with server + dist
   - Expose PORT
   - CMD: `node server/server.js`
-- [ ] Create `.dockerignore` (node_modules, .env, data/\*.db, .git)
-- [ ] Create `docker-compose.yml` (optional, for easy `docker compose up`)
-- [ ] Verify: `docker build` succeeds, `docker run` starts the app, app is fully functional in the container
-- [ ] Verify: works on a clean environment (no host node_modules or .env assumed)
+- [x] Create `.dockerignore` (node_modules, .env, data/\*.db, .git)
+- [x] Verify: `docker build robots .` succeeds, `docker run -p 3000:3000 robots` starts the app, app is fully functional in the container
+- [x] Verify: works on a clean environment (no host node_modules or .env assumed)
 
 ### 2.22 README.md
 
@@ -580,15 +579,15 @@ All component and API client tests were written alongside their implementation s
 
 ### 2.23 Phase 2 Checkpoint Review
 
-- [ ] Full app walkthrough: create simulation → step through → run → query houses → query presents → select different simulation — all flows work end to end
-- [ ] All tests pass: `npm test` runs server unit/integration + client component tests
-- [ ] Lint clean: `npm run lint` passes with no warnings or errors
-- [ ] Format clean: `npm run format` produces no changes
-- [ ] Accessibility audit: run unlighthouse or manual keyboard/screen reader walkthrough
-- [ ] Production build works: `npm run build && npm start` serves the full app
-- [ ] Docker build works: `docker build` and `docker run` produce a working app
+- [x] Full app walkthrough: create simulation → step through → run → query houses → query presents → select different simulation — all flows work end to end
+- [x] All tests pass: `npm test` runs server unit/integration + client component tests
+- [x] Lint clean: `npm run lint` passes with no warnings or errors
+- [x] Format clean: `npm run format` produces no changes
+- [x] Accessibility audit: run unlighthouse or manual keyboard/screen reader walkthrough
+- [x] Production build works: `npm run build && npm start` serves the full app
+- [x] Docker build works: `docker build` and `docker run` produce a working app
 - [ ] Spec alignment: verify the running app matches every detail in spec.md §8–§16
 - [ ] Code review pass: JSDoc on all exported functions and components, consistent formatting, no dead code
 - [ ] README is complete and accurate
 - [ ] App has been checked on a fresh install on a unix based system and everything works, all scripts work, everything is tested
-- [ ] `docs/findings-decisions-actions.md` is up to date with any deviations discovered during implementation
+- [x] `docs/findings-decisions-actions.md` is up to date with any deviations discovered during implementation

@@ -8,51 +8,51 @@
         aria-modal="true"
         aria-labelledby="create-sim-title"
       >
-      <h2 id="create-sim-title" class="modal-title">Create Simulation</h2>
+        <h2 id="create-sim-title" class="modal-title">Create Simulation</h2>
 
-      <form @submit.prevent="submit">
-        <div class="form-group">
-          <label for="robot-count" class="form-label">Robot count</label>
-          <input
-            id="robot-count"
-            ref="robotCountInput"
-            v-model.number="robotCount"
-            type="number"
-            class="form-input"
-            :class="{ 'input-error': robotCountError }"
-          />
-          <p v-if="robotCountError" class="field-error">{{ robotCountError }}</p>
-        </div>
+        <form @submit.prevent="submit">
+          <div class="form-group">
+            <label for="robot-count" class="form-label">Robot count</label>
+            <input
+              id="robot-count"
+              ref="robotCountInput"
+              v-model.number="robotCount"
+              type="number"
+              class="form-input"
+              :class="{ 'input-error': robotCountError }"
+            />
+            <p v-if="robotCountError" class="field-error">{{ robotCountError }}</p>
+          </div>
 
-        <div class="form-group">
-          <label for="move-sequence" class="form-label">Move sequence</label>
-          <textarea
-            id="move-sequence"
-            ref="moveSequenceInput"
-            v-model="moveSequence"
-            class="form-textarea"
-            :class="{ 'input-error': moveSequenceError }"
-            rows="4"
-            placeholder="Click here and press arrow keys or type <, V, >, ^ to create sequence"
-            @keydown="handleKeydown"
-          ></textarea>
-          <p class="form-hint">
-            Use arrow keys to input directions, or type
-            <kbd>^</kbd> <kbd>V</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd> directly.
-          </p>
-          <p v-if="moveSequenceError" class="field-error">{{ moveSequenceError }}</p>
-        </div>
+          <div class="form-group">
+            <label for="move-sequence" class="form-label">Move sequence</label>
+            <textarea
+              id="move-sequence"
+              ref="moveSequenceInput"
+              v-model="moveSequence"
+              class="form-textarea"
+              :class="{ 'input-error': moveSequenceError }"
+              rows="4"
+              placeholder="Click here and press arrow keys or type <, V, >, ^ to create sequence"
+              @keydown="handleKeydown"
+            ></textarea>
+            <p class="form-hint">
+              Use arrow keys to input directions, or type
+              <kbd>^</kbd> <kbd>V</kbd> <kbd>&lt;</kbd> <kbd>&gt;</kbd> directly.
+            </p>
+            <p v-if="moveSequenceError" class="field-error">{{ moveSequenceError }}</p>
+          </div>
 
-        <p v-if="apiError" class="api-error" role="alert">{{ apiError }}</p>
+          <p v-if="apiError" class="api-error" role="alert">{{ apiError }}</p>
 
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" @click="cancel">Cancel</button>
-          <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
-            {{ isSubmitting ? 'Creating...' : 'Create' }}
-          </button>
-        </div>
-      </form>
-    </div>
+          <div class="modal-actions">
+            <button type="button" class="btn btn-secondary" @click="cancel">Cancel</button>
+            <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
+              {{ isSubmitting ? 'Creating...' : 'Create' }}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   </Transition>
 </template>

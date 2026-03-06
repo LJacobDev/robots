@@ -13,9 +13,7 @@ describe('WelcomeScreen', () => {
     const wrapper = mount(WelcomeScreen);
 
     expect(wrapper.find('.welcome-title').text()).toBe('Robots Simulation');
-    expect(wrapper.find('.welcome-message').text()).toContain(
-      'Select a simulation',
-    );
+    expect(wrapper.find('.welcome-message').text()).toContain('Select a simulation');
     expect(wrapper.find('.welcome-message').text()).toContain('create a new one');
   });
 });

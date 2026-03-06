@@ -137,9 +137,7 @@ export async function getTotalPresents(id) {
  * @returns {Promise<{ simulationId: number, minPresents: number, houseCount: number }>}
  */
 export async function getHousesByThreshold(id, minPresents) {
-  const response = await fetch(
-    `${BASE_URL}/${id}/houses?minPresents=${minPresents}`
-  );
+  const response = await fetch(`${BASE_URL}/${id}/houses?minPresents=${minPresents}`);
   await handleResponse(response);
   return response.json();
 }
