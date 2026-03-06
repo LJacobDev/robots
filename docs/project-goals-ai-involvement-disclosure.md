@@ -4,7 +4,7 @@
 
 My aim was to produce the highest quality and maintainable code, with documentation, test coverage, and UX that I could achieve while also having a fast turnaround time.
 
-Making the project easy to work with and maintain was favoured over spending time on getting UI styles absolutely perfect.
+Making the project easy to work with and maintain was favoured over spending time on getting UI styles absolutely perfect. A spec-driven development workflow was used in order to make sure the project could move fast through planning and implementation phases while making sure that the end result adheres to what was intended.
 
 AI tooling was intentionally leveraged to help me fill in features like thorough JSDoc comments, unit and integration tests, UX styles like shadow box and hover states, ARIA labels, and other such additions. The things that would normally invole extensive typing and manual toil while also having straightforward predictable outcomes, which LLMs are strong at helping with.
 
@@ -14,7 +14,7 @@ All architecture and design decisions and tradeoff choices are my own, but I use
 
 I aimed to make this project to be reasonably engineered for its scope while also leaving it open to being able to be extended or adjusted for larger scale without needing significant refactoring or rewrites.
 
-I walked the boundary between pushing as many robust production-ready code quality and UX additions as I could while simultaneously keeping it at a scope where I would also be in full control of every file. Every file and line has been vetted to ensure that everything here is here for a reason and is exactly what I wanted it to be.
+I walked the boundary between pushing as many robust production-ready code quality and UX additions as I could while simultaneously keeping it at a scope where I would also be in full control of everything in the project. Every file and line has been vetted to ensure that everything here is here for a reason and is exactly what I wanted it to be.
 
 ## Documents of Interest
 
