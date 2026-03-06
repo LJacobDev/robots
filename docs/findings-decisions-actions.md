@@ -108,3 +108,15 @@ This means the standalone endpoints (`GET /robots` §4.4, `GET /presents` §4.6)
 **Tradeoff awareness:** At current scale (single human user, debounced button clicks), the full-state refresh adds negligible load — the query hits an indexed SQLite database with a small number of rows and executes in microseconds. At higher scale with many concurrent users or simulations with thousands of houses, a delta-based approach (updating only the changed data from the step response) would be more efficient. This is documented as a recommended optimization for future scaling and should be monitored for load as the application runs.
 
 **Action:** Updated spec §4.8 response shape to include `houses[]`. Updated spec §9.3 design decision. Updated plan step 2.13 to use `getSimulation(id)` as the single follow-up call for both step and run.
+
+---
+
+## 2026-03-05 — Single Unified Test Script
+
+Considered whether to split test scripts by layer (`test:server`, `test:client`) or by type (`test:unit`, `test:integration`, `test:component`).
+
+**Decision:** A single `npm test` runs everything — server unit tests, integration tests, and client component tests — from one Vitest config at the root. A `test:watch` script is also available for continuous feedback during development. No separate `test:server` or `test:client` scripts are defined in `package.json`.
+
+**Rationale:** With ~100 total tests across server and client, the full suite runs in seconds. Splitting into multiple scripts adds `package.json` clutter and coordination overhead without meaningful benefit at this scale. For ad-hoc targeted runs during development, `vitest --dir server` or `vitest --dir client` can be used directly in the terminal without needing dedicated scripts.
+
+**Action:** Updated plan steps 2.4 and 2.19 to reflect a single unified test command.

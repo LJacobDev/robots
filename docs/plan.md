@@ -307,6 +307,12 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 - [ ] Each function uses `fetch()`, checks `response.ok`, parses JSON, throws on error with the error body attached
 - [ ] Dev-only `console.error()` logging gated behind `import.meta.env.DEV`
 - [ ] JSDoc on each function
+- [ ] Install `@vue/test-utils` as dev dependency (needed for component tests in later steps)
+- [ ] Configure Vitest to cover both `server/` and `client/src/` from the root config so `npm test` runs everything
+- [ ] Ensure `test:watch` script is available for continuous testing during development
+- [ ] Write API client unit tests (`client/src/api/__tests__/simulations.test.js`):
+  - Mock `fetch` and verify each function makes the correct request (method, URL, body)
+  - Verify error handling: non-ok response throws with error body
 - [ ] Verify: import a function in App.vue's `mounted()`, call `listSimulations()`, confirm data appears in console
 
 ### 2.5 Simulation List (Left Sidebar)
@@ -321,6 +327,14 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 - [ ] Fetch simulation list on `App.vue` mount via `listSimulations()` API call
 - [ ] Handle loading state (skeleton placeholders) and empty state ("No simulations yet")
 - [ ] Style: scrollable overflow, status badge colors (gray/blue/green), truncated text with ellipsis
+- [ ] Write component tests for `SimulationList.vue`:
+  - Renders one list item per simulation with ID, status badge, and truncated move sequence
+  - Emits `select` with the simulation ID when an item is clicked
+  - Highlights the active item when `selectedId` matches
+  - Shows empty state message when `simulations` array is empty
+  - Shows skeleton placeholders when in loading state
+  - Status badge color matches simulation status (gray/blue/green)
+- [ ] Write component test for `WelcomeScreen.vue`: renders message text
 - [ ] Verify: list loads from API, clicking an item updates `selectedSimulationId`, active item highlights
 
 ### 2.6 Welcome Screen
@@ -350,6 +364,17 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 - [ ] Wire into `App.vue`:
   - "Create Simulation" button in left sidebar opens modal
   - On `created` event: add new simulation to list, select it, close modal
+- [ ] Write component tests for `CreateSimulationModal.vue`:
+  - Renders form with robot count input, move sequence textarea, and submit/cancel buttons
+  - Robot count input validates >= 1 (rejects 0 and negative numbers)
+  - Arrow key presses in textarea append correct characters: ArrowUp→`^`, ArrowDown→`V`, ArrowLeft→`<`, ArrowRight→`>`
+  - Non-arrow, non-editing keypresses in textarea are silently ignored (no character inserted)
+  - Submit button calls `createSimulation()` API and emits `created` with response data on success
+  - Submit button shows "Creating..." and is disabled while API call is in flight
+  - API error displays as inline error message within the modal
+  - Cancel button emits `close` and resets form fields
+  - Escape key emits `close`
+  - Focus moves to first input when modal becomes visible
 - [ ] Verify: modal opens/closes, arrow keys produce move characters, submit creates simulation via API, new simulation appears in list and is selected
 
 ### 2.8 Robot SVG Component
@@ -359,6 +384,7 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - The SVG body fill uses the `color` prop
   - Small, recognizable robot shape (head, body, antenna — simple geometric shapes)
 - [ ] Export or save a static version of the SVG for use as the browser favicon (`client/public/favicon.svg` or similar)
+- [ ] Write component test for `RobotMarker.vue`: renders SVG with correct color prop
 - [ ] Verify: renders at various colors, scales reasonably at small sizes (grid marker ~20–30px)
 
 ### 2.9 House SVG Component
@@ -366,6 +392,7 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 - [ ] Create `HouseMarker.vue` — inline SVG gift box icon
   - Simple box with ribbon and bow, single fill color
   - Sized to match the grid cell scale
+- [ ] Write component test for `HouseMarker.vue`: renders SVG
 - [ ] Verify: renders clearly at grid cell size, visually distinct from robot markers
 
 ### 2.10 Simulation Grid
@@ -380,6 +407,14 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 - [ ] Position house markers using the same translate approach
 - [ ] Handle stacked robots: when multiple robots share a cell, offset each SVG slightly so all are partially visible
 - [ ] Wrap grid container in a viewport div with `overflow: auto` for scrolling
+- [ ] Write component tests for `SimulationGrid.vue`:
+  - Renders a robot marker at the correct pixel position for a given grid coordinate (x _ cellSize, -y _ cellSize)
+  - Y-axis is inverted: a robot at (0, 2) renders above (0, 0), not below
+  - Renders house markers at correct positions using the same coordinate-to-pixel logic
+  - When multiple robots share a cell, each gets a slight translate offset so all are partially visible
+  - Grid container is sized to the bounding box of all entities plus padding
+  - Each robot SVG element has the correct `data-robot-id` attribute
+  - Zoom: `transform: scale()` is applied to the grid container when zoomLevel ≠ 1.0
 - [ ] Verify: robots and houses render at correct positions, grid lines visible, scrolling works when content overflows
 
 ### 2.11 Zoom Controls
@@ -404,6 +439,19 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - Button text changes during loading: "Stepping..." / "Running..."
 - [ ] Progress bar: green bar width = `(currentStep / totalSteps) * 100%`, text label "Step X of Y"
   - Smooth width transition (respects prefers-reduced-motion)
+- [ ] Write component tests for `ControlPanel.vue`:
+  - Renders simulation info: ID, status badge, move sequence
+  - Renders robot list with name, color, and position for each robot
+  - Step and Run buttons are enabled when status is 'created' or 'running'
+  - Step and Run buttons are disabled when status is 'completed'
+  - Step and Run buttons are disabled and show loading text when `isStepLoading` or `isRunLoading` is true
+  - Clicking Step emits `step` event
+  - Clicking Run emits `run` event
+  - Progress bar width reflects `currentStep / totalSteps` ratio
+  - Houses query: entering a threshold and clicking Check emits `check-houses` with the threshold number
+  - Houses query: threshold input validates >= 1
+  - Houses query result displays when `houseQueryResult` prop is provided, empty when null
+  - Clicking a robot name emits `scroll-to-robot` with the robot's ID
 - [ ] Verify: selecting a simulation loads its data, step/run buttons work, progress bar updates
 
 ### 2.13 Step & Run API Integration
@@ -484,22 +532,14 @@ Both step and run follow the same pattern: perform the action, then refresh full
 - [ ] Mobile breakpoint: collapse sidebars on small screens (basic usability, not a primary target)
 - [ ] Verify: animations are smooth, no janky layout shifts, reduced motion preference is respected
 
-### 2.19 Frontend Testing
+### 2.19 Frontend Test Coverage Review
 
-- [ ] Install `@vue/test-utils` as dev dependency
-- [ ] API client tests (`client/src/api/__tests__/simulations.test.js`):
-  - Mock `fetch` and verify each function makes the correct request (method, URL, body)
-  - Verify error handling: non-ok response throws with error body
-- [ ] Component tests (using Vitest + Vue Test Utils):
-  - `SimulationList.vue`: renders items, emits select on click, shows empty state, shows loading state
-  - `CreateSimulationModal.vue`: renders form, validates input, captures arrow keys, emits created on submit, emits close on cancel/escape
-  - `ControlPanel.vue`: renders stats, disables buttons when completed, emits step/run/check-houses events
-  - `RobotMarker.vue`: renders SVG with correct color prop
-  - `HouseMarker.vue`: renders SVG
-  - `SimulationGrid.vue`: positions markers correctly, applies zoom
-- [ ] Add `test:client` script to root `package.json` (runs Vitest from `client/`)
-- [ ] Update root `test` script to run both server and client tests
-- [ ] Verify: all component tests pass, `npm test` runs full suite (server + client)
+All component and API client tests were written alongside their implementation steps (2.4–2.14). This step reviews coverage and fills any gaps.
+
+- [ ] Review all existing frontend tests — identify any missing edge cases or error paths
+- [ ] Fill coverage gaps: add tests for any untested branches, error states, or prop variations
+- [ ] Verify `npm test` runs all server + client tests in a single pass
+- [ ] Verify: all tests pass, no skipped or pending tests
 
 ### 2.20 Build & Production Serving
 
