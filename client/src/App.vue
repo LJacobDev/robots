@@ -2,7 +2,10 @@
   <div class="app-frame">
     <div class="app-layout" :class="{ 'has-right-sidebar': selectedSimulationId }">
       <aside class="sidebar-left">
-        <h2 class="sidebar-title">Simulations</h2>
+        <div class="sidebar-header">
+          <h2 class="sidebar-title">Simulations</h2>
+          <button class="btn-create" @click="showCreateModal = true">+ New</button>
+        </div>
         <SimulationList
           :simulations="simulations"
           :selected-id="selectedSimulationId"
@@ -23,11 +26,18 @@
         <p class="placeholder-text">Control panel goes here</p>
       </aside>
     </div>
+
+    <CreateSimulationModal
+      :visible="showCreateModal"
+      @close="showCreateModal = false"
+      @created="handleCreated"
+    />
   </div>
 </template>
 
 <script>
 import { listSimulations } from './api/simulations.js';
+import CreateSimulationModal from './components/CreateSimulationModal.vue';
 import SimulationList from './components/SimulationList.vue';
 import WelcomeScreen from './components/WelcomeScreen.vue';
 
@@ -42,7 +52,7 @@ import WelcomeScreen from './components/WelcomeScreen.vue';
 export default {
   name: 'App',
 
-  components: { SimulationList, WelcomeScreen },
+  components: { CreateSimulationModal, SimulationList, WelcomeScreen },
 
   data() {
     return {
@@ -52,6 +62,8 @@ export default {
       simulations: [],
       /** Whether the simulation list is currently loading */
       loadingList: true,
+      /** Whether the create simulation modal is open */
+      showCreateModal: false,
     };
   },
 
@@ -86,6 +98,18 @@ export default {
      */
     selectSimulation(id) {
       this.selectedSimulationId = id;
+    },
+
+    /**
+     * Handles a newly created simulation.
+     * Prepends it to the list, selects it, and closes the modal.
+     *
+     * @param {object} data - The API response containing the new simulation
+     */
+    handleCreated(data) {
+      this.simulations.unshift(data.simulation);
+      this.selectedSimulationId = data.simulation.id;
+      this.showCreateModal = false;
     },
   },
 };
@@ -138,10 +162,42 @@ export default {
   padding: var(--space-md);
 }
 
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-md);
+}
+
 .sidebar-title {
   font-size: var(--text-lg);
   font-weight: 600;
-  margin-bottom: var(--space-md);
+}
+
+.btn-create {
+  padding: var(--space-xs) var(--space-sm);
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-primary);
+  color: var(--color-text-inverse);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-create:hover {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-create:active {
+  background-color: var(--color-primary-active);
+}
+
+.btn-create:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* Temporary placeholder styling — removed when real components arrive */

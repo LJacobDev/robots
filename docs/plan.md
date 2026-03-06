@@ -350,24 +350,24 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.7 Create Simulation Modal
 
-- [ ] Create `CreateSimulationModal.vue` component:
+- [x] Create `CreateSimulationModal.vue` component:
   - Props: `visible` (boolean)
   - Emits: `close`, `created` (new simulation data)
   - Data: `robotCount` (default 1), `moveSequence` (empty string), `error` (null), `isSubmitting` (false)
-- [ ] Robot count: number input, validated >= 1
-- [ ] Move sequence: `<textarea>` with monospace font
+- [x] Robot count: number input, validated >= 1
+- [x] Move sequence: `<textarea>` with monospace font
   - `@keydown` handler captures arrow keys → appends `^`, `V`, `<`, `>` and calls `preventDefault()`
   - Allows only valid characters and editing keys; silently ignores all others
   - Hint text below input explaining arrow key usage
-- [ ] Submit: calls `createSimulation()` API, emits `created` on success, shows inline error on failure
-- [ ] Loading state: button text "Creating...", disabled during API call
-- [ ] Cancel: Escape key or click-outside closes and resets fields
-- [ ] Focus trap: when modal opens, focus moves to first input; Tab cycles within modal; focus returns to trigger on close
-- [ ] Modal overlay: semi-transparent backdrop, centered card
-- [ ] Wire into `App.vue`:
+- [x] Submit: calls `createSimulation()` API, emits `created` on success, shows inline error on failure
+- [x] Loading state: button text "Creating...", disabled during API call
+- [x] Cancel: Escape key or click-outside closes and resets fields
+- [x] Focus trap: when modal opens, focus moves to first input; Tab cycles within modal; focus returns to trigger on close
+- [x] Modal overlay: semi-transparent backdrop, centered card
+- [x] Wire into `App.vue`:
   - "Create Simulation" button in left sidebar opens modal
   - On `created` event: add new simulation to list, select it, close modal
-- [ ] Write component tests for `CreateSimulationModal.vue`:
+- [x] Write component tests for `CreateSimulationModal.vue`:
   - Renders form with robot count input, move sequence textarea, and submit/cancel buttons
   - Robot count input validates >= 1 (rejects 0 and negative numbers)
   - Arrow key presses in textarea append correct characters: ArrowUp→`^`, ArrowDown→`V`, ArrowLeft→`<`, ArrowRight→`>`
@@ -378,7 +378,7 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - Cancel button emits `close` and resets form fields
   - Escape key emits `close`
   - Focus moves to first input when modal becomes visible
-- [ ] Verify: modal opens/closes, arrow keys produce move characters, submit creates simulation via API, new simulation appears in list and is selected
+- [x] Verify: modal opens/closes, arrow keys produce move characters, submit creates simulation via API, new simulation appears in list and is selected
 
 ### 2.8 Robot SVG Component
 
