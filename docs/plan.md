@@ -400,17 +400,17 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.10 Simulation Grid
 
-- [ ] Create `SimulationGrid.vue` component:
+- [x] Create `SimulationGrid.vue` component:
   - Props: `robots` (array), `houses` (array), `robotCount` (number for color calculation — assign each robot an HSL color via `hue = (robot.turnOrder / robotCount) * 360` to space colors evenly around the wheel)
   - The grid container uses a CSS background pattern for grid lines (repeating-linear-gradient or background-size)
   - Container is sized to the bounding box of all robots + houses, plus padding
-- [ ] Position robot markers using `transform: translate()` based on grid coordinates
+- [x] Position robot markers using `transform: translate()` based on grid coordinates
   - Coordinate-to-pixel conversion: `(x * cellSize, -y * cellSize)` (y-axis inverted so `^` goes visually up)
   - Each robot SVG has a `data-robot-id` attribute
-- [ ] Position house markers using the same translate approach
-- [ ] Handle stacked robots: when multiple robots share a cell, offset each SVG slightly so all are partially visible
-- [ ] Wrap grid container in a viewport div with `overflow: auto` for scrolling
-- [ ] Write component tests for `SimulationGrid.vue`:
+- [x] Position house markers using the same translate approach
+- [x] Handle stacked robots: when multiple robots share a cell, offset each SVG slightly so all are partially visible
+- [x] Wrap grid container in a viewport div with `overflow: auto` for scrolling
+- [x] Write component tests for `SimulationGrid.vue`:
   - Renders a robot marker at the correct pixel position for a given grid coordinate (x _ cellSize, -y _ cellSize)
   - Y-axis is inverted: a robot at (0, 2) renders above (0, 0), not below
   - Renders house markers at correct positions using the same coordinate-to-pixel logic
@@ -418,7 +418,7 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - Grid container is sized to the bounding box of all entities plus padding
   - Each robot SVG element has the correct `data-robot-id` attribute
   - Zoom: `transform: scale()` is applied to the grid container when zoomLevel ≠ 1.0
-- [ ] Verify: robots and houses render at correct positions, grid lines visible, scrolling works when content overflows
+- [x] Verify: robots and houses render at correct positions, grid lines visible, scrolling works when content overflows
 
 ### 2.11 Zoom Controls
 

@@ -16,7 +16,9 @@
 
       <main class="center-area">
         <template v-if="selectedSimulationId">
-          <p class="placeholder-text">Grid goes here (simulation {{ selectedSimulationId }})</p>
+          <p class="placeholder-text">
+            Simulation view goes here (simulation {{ selectedSimulationId }})
+          </p>
         </template>
         <WelcomeScreen v-else />
       </main>
