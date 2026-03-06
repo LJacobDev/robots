@@ -1,12 +1,13 @@
 <template>
-  <div v-if="visible" class="modal-overlay" @mousedown.self="cancel" @keydown.esc="cancel">
-    <div
-      ref="modal"
-      class="modal-card"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="create-sim-title"
-    >
+  <Transition name="modal">
+    <div v-if="visible" class="modal-overlay" @mousedown.self="cancel" @keydown.esc="cancel">
+      <div
+        ref="modal"
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-sim-title"
+      >
       <h2 id="create-sim-title" class="modal-title">Create Simulation</h2>
 
       <form @submit.prevent="submit">
@@ -52,7 +53,8 @@
         </div>
       </form>
     </div>
-  </div>
+    </div>
+  </Transition>
 </template>
 
 <script>
@@ -384,6 +386,7 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  box-shadow: var(--shadow-btn);
 }
 
 .btn:focus-visible {
@@ -418,5 +421,26 @@ export default {
 .btn-secondary:hover {
   background-color: var(--color-surface-alt);
   color: var(--color-text);
+}
+
+/* --- Modal transition --- */
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity var(--transition-normal);
+}
+
+.modal-enter-active .modal-card,
+.modal-leave-active .modal-card {
+  transition: transform var(--transition-normal);
+}
+
+.modal-enter-from,
+.modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-card,
+.modal-leave-to .modal-card {
+  transform: scale(0.95);
 }
 </style>

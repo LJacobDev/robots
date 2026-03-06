@@ -525,7 +525,7 @@ The left sidebar is always visible. The right sidebar appears only when a simula
 ### 9.2 Left Sidebar
 
 - **"Create Simulation" button** — opens the creation modal (§10).
-- **Simulation list** — vertical scrollable list of all simulations, showing ID, status badge, and move sequence (truncated). Clicking a simulation selects it and loads the simulation view.
+- **Simulation list** — vertical scrollable list of all simulations, showing ID (formatted as "Sim-N"), status badge, and created-at timestamp. Clicking a simulation selects it and loads the simulation view.
 
 ### 9.3 Right Sidebar (Control Panel)
 
@@ -587,11 +587,13 @@ The grid represents the infinite 2D plane where robots move. Only cells that con
 
 The grid container is sized dynamically to the bounding box of all occupied coordinates (robots + houses with delivered presents), plus padding. The center area acts as a scrollable viewport (`overflow: auto`) over this container.
 
+The origin cell `(0, 0)` is visually marked with a distinct green background and border, so the starting position is always identifiable and serves as a point of reference when the grid boundaries move.
+
 ### 11.2 Robot Rendering
 
-Each robot is rendered as a small SVG icon positioned on the grid using CSS `transform: translate(x, y)`. Robots are visually distinguished by color, assigned via HSL hue spacing (`hue = (turnOrder / robotCount) * 360`).
+Each robot is rendered as a small SVG icon positioned on the grid using CSS `transform: translate(x, y)`. Robots are visually distinguished by color, assigned via HSL hue spacing (`hue = (turnOrder / robotCount) * 360`). A CSS transition on `transform` animates robot movement between cells (disabled under `prefers-reduced-motion: reduce`).
 
-When multiple robots occupy the same cell, their SVG icons are stacked with a slight offset so that all are partially visible.
+When multiple robots occupy the same cell, each robot receives a small deterministic pixel jitter (±3px) seeded from its name, so that all robots remain clustered within the cell rather than spreading outward. This keeps stacked robots visible without overflowing cell boundaries.
 
 ### 11.3 House Rendering
 
@@ -599,9 +601,10 @@ Houses that have received at least one present are rendered as a small gift-box 
 
 ### 11.4 Zoom
 
-The grid supports zoom in and zoom out via `+` and `−` buttons positioned at a corner of the grid viewport. Zoom is implemented via CSS `transform: scale()` on the grid container. The zoom level is constrained to a reasonable range (e.g., 0.25× to 3×).
+The grid supports zoom in and zoom out via `+` and `−` buttons positioned at a corner of the grid viewport. Zoom is implemented via reactive cell sizing — all pixel calculations (cell size, marker size, grid dimensions, background grid line spacing) are multiplied by the zoom level, so the grid naturally fills the viewport with appropriately sized cells. The zoom level is constrained to a range of 0.25× to 3×. When zooming, the viewport scroll position is adjusted to keep the visual center anchored to the same grid coordinate.
 
-Mouse wheel zoom (Ctrl+scroll) may be added as a polish item if time permits, but the button controls are the primary interface.
+> **Design decision — reactive cell sizing over CSS `transform: scale()`:**
+> The initial implementation used `transform: scale()` on the grid container, which visually shrank the grid but left whitespace around it at low zoom levels rather than filling the viewport with smaller cells. Reactive cell sizing was adopted instead: a computed `effectiveCellSize` (`CELL_SIZE * zoomLevel`) flows into all positioning, sizing, and background calculations. This produces the expected behavior where cells shrink/grow while the grid continues to fill the available space.
 
 ### 11.5 Click-to-Scroll from Robot List
 
@@ -762,8 +765,8 @@ App.vue                             (owns all state, handles all API calls)
 | `WelcomeScreen.vue`         | Shown when no simulation is selected. Prompt to create or select.                                                                                                                                          |
 | `SimulationView.vue`        | Presentational wrapper for the center area. Displays loading, error (with retry), or SimulationGrid based on props. Exposes `scrollToRobot()` via ref.                                                     |
 | `SimulationGrid.vue`        | Renders the grid background, robot markers, and house markers. Handles zoom and scroll.                                                                                                                    |
-| `RobotMarker.vue`           | Single SVG robot icon. Props: color, x, y, robot ID.                                                                                                                                                       |
-| `HouseMarker.vue`           | Single SVG gift box icon. Props: x, y.                                                                                                                                                                     |
+| `RobotMarker.vue`           | Single SVG robot icon. Props: `color`, `size`, `label`. Positioning is handled by the parent `SimulationGrid` via wrapper elements with `transform: translate()`.                                          |
+| `HouseMarker.vue`           | Single SVG gift box icon. Props: `color`, `size`. Positioning is handled by the parent, same as `RobotMarker`.                                                                                             |
 | `ControlPanel.vue`          | Step/Run buttons, progress bar, stats, houses query input, robot list with click-to-scroll.                                                                                                                |
 
 ### 15.3 State Management

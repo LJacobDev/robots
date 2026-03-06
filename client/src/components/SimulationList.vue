@@ -13,6 +13,14 @@
       </div>
     </template>
 
+    <!-- Error state -->
+    <div v-else-if="error" class="error-state" aria-live="polite">
+      <p class="error-message">{{ error }}</p>
+      <button class="btn-retry" @click="$emit('retry')">
+        Retry
+      </button>
+    </div>
+
     <!-- Empty state -->
     <p v-else-if="simulations.length === 0" class="empty-state">
       No simulations yet — create one to get started.
@@ -67,9 +75,14 @@ export default {
       type: Boolean,
       default: false,
     },
+    /** @type {string|null} Error message to display, or null if no error */
+    error: {
+      type: String,
+      default: null,
+    },
   },
 
-  emits: ['select'],
+  emits: ['select', 'retry'],
 
   methods: {
     /**
@@ -169,6 +182,39 @@ export default {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
   margin: 0;
+}
+
+/* --- Error state --- */
+.error-state {
+  text-align: center;
+  padding: var(--space-lg) var(--space-md);
+}
+
+.error-message {
+  color: var(--color-error);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-sm);
+}
+
+.btn-retry {
+  padding: var(--space-xs) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.btn-retry:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.btn-retry:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 /* --- Empty state --- */

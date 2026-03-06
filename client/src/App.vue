@@ -10,7 +10,9 @@
           :simulations="simulations"
           :selected-id="selectedSimulationId"
           :loading="loadingList"
+          :error="listError"
           @select="selectSimulation"
+          @retry="fetchSimulations"
         />
       </aside>
 
@@ -100,6 +102,8 @@ export default {
       simulations: [],
       /** Whether the simulation list is currently loading */
       loadingList: true,
+      /** @type {string|null} Error message if simulation list fetch failed */
+      listError: null,
       /** Whether the create simulation modal is open */
       showCreateModal: false,
 
@@ -157,6 +161,7 @@ export default {
      */
     async fetchSimulations() {
       this.loadingList = true;
+      this.listError = null;
       try {
         const data = await listSimulations();
         this.simulations = data.simulations;
@@ -165,6 +170,7 @@ export default {
           console.error('[App] Failed to fetch simulations:', err);
         }
         this.simulations = [];
+        this.listError = 'Could not load simulations, please try again.';
       } finally {
         this.loadingList = false;
       }
@@ -295,6 +301,7 @@ export default {
         const data = await getHousesByThreshold(this.selectedSimulationId, threshold);
         this.houseQueryResult = data;
       } catch (err) {
+        this.houseQueryResult = { error: 'Could not check houses due to an error.' };
         if (import.meta.env.DEV) {
           console.error('[App] Houses query error:', err);
         }
@@ -348,6 +355,7 @@ export default {
   border-right: 1px solid var(--color-border);
   overflow-y: auto;
   padding: var(--space-md);
+  box-shadow: var(--shadow-sm);
 }
 
 .sidebar-right {
@@ -383,6 +391,7 @@ export default {
   font-weight: 600;
   cursor: pointer;
   transition: background-color var(--transition-fast);
+  box-shadow: var(--shadow-btn);
 }
 
 .btn-create:hover {
@@ -396,5 +405,39 @@ export default {
 .btn-create:focus-visible {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
+}
+
+/* --- Breakpoint for narrower screens --- */
+@media (max-width: 1024px) {
+  .app-frame {
+    align-items: stretch;
+  }
+
+  .app-layout {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+  }
+
+  .app-layout.has-right-sidebar {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+
+  .sidebar-left {
+    border-right: none;
+    border-bottom: 1px solid var(--color-border);
+    max-height: 30vh;
+  }
+
+  .sidebar-right {
+    border-left: none;
+    border-top: 1px solid var(--color-border);
+    max-height: 40vh;
+  }
 }
 </style>

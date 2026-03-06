@@ -6,7 +6,7 @@
     </div>
 
     <!-- Error state -->
-    <div v-else-if="error" class="error-state">
+    <div v-else-if="error" class="error-state" aria-live="polite">
       <p class="error-text">{{ error }}</p>
       <button class="btn btn-secondary" @click="$emit('retry')">Retry</button>
     </div>

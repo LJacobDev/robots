@@ -1,6 +1,6 @@
 <template>
   <div class="grid-wrapper">
-    <div ref="viewport" class="grid-viewport">
+    <div ref="viewport" class="grid-viewport" role="img" aria-label="Simulation grid showing robot and house positions">
       <div class="grid-container" :style="containerStyle">
         <!-- Origin crosshair -->
         <div class="origin-marker" :style="originStyle">
@@ -38,11 +38,11 @@
 
     <!-- Zoom controls (outside scrollable viewport so they stay fixed) -->
     <div class="zoom-controls">
-      <button class="zoom-btn" :disabled="zoomLevel >= maxZoom" title="Zoom in" @click="zoomIn">
+      <button class="zoom-btn" :disabled="zoomLevel >= maxZoom" title="Zoom in" aria-label="Zoom in" @click="zoomIn">
         +
       </button>
-      <span class="zoom-label">{{ zoomPercent }}%</span>
-      <button class="zoom-btn" :disabled="zoomLevel <= minZoom" title="Zoom out" @click="zoomOut">
+      <span class="zoom-label" aria-live="polite">{{ zoomPercent }}%</span>
+      <button class="zoom-btn" :disabled="zoomLevel <= minZoom" title="Zoom out" aria-label="Zoom out" @click="zoomOut">
         −
       </button>
     </div>
@@ -397,8 +397,8 @@ export default {
   position: relative;
   background-color: var(--color-surface-alt);
   background-image:
-    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+    linear-gradient(to right, var(--color-border-strong) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border-strong) 1px, transparent 1px);
   min-width: 100%;
   min-height: 100%;
 }

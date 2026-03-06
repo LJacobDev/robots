@@ -12,7 +12,7 @@
     </section>
 
     <!-- Statistics -->
-    <section class="panel-section">
+    <section class="panel-section" aria-live="polite">
       <h3 class="section-title">Statistics</h3>
       <div class="info-row">
         <span class="info-label">Robots</span>
@@ -21,42 +21,6 @@
       <div class="info-row">
         <span class="info-label">Presents delivered</span>
         <span>{{ totalPresents }}</span>
-      </div>
-    </section>
-
-    <!-- Houses query -->
-    <section class="panel-section">
-      <h3 class="section-title">Number of houses with this many presents:</h3>
-      <form class="query-form" @submit.prevent="submitHouseQuery">
-        <label for="house-threshold" class="sr-only">Minimum presents</label>
-        <input
-          id="house-threshold"
-          v-model.number="houseThreshold"
-          type="number"
-          min="1"
-          class="query-input"
-          placeholder="Min presents..."
-        />
-        <button type="submit" class="btn btn-secondary btn-sm">Check</button>
-      </form>
-      <p v-if="houseQueryResult" class="query-result">
-        <strong>{{ houseQueryResult.houseCount }}</strong>
-        {{ houseQueryResult.houseCount === 1 ? 'house has' : 'houses have' }}
-        ≥ {{ houseQueryResult.minPresents }}
-        {{ houseQueryResult.minPresents === 1 ? 'present' : 'presents' }}
-      </p>
-    </section>
-
-    <!-- Progress bar -->
-    <section class="panel-section">
-      <div class="progress-header">
-        <span class="info-label">Progress</span>
-        <span class="progress-text"
-          >Step {{ simulation.currentStep }} of {{ simulation.totalSteps }}</span
-        >
-      </div>
-      <div class="progress-bar-track">
-        <div class="progress-bar-fill" :style="progressStyle"></div>
       </div>
     </section>
 
@@ -77,6 +41,45 @@
         >
           {{ isRunLoading ? 'Running...' : 'Run All' }}
         </button>
+      </div>
+    </section>
+
+    <!-- Houses query -->
+    <section class="panel-section">
+      <h3 class="section-title">Number of houses with this many presents:</h3>
+      <form class="query-form" @submit.prevent="submitHouseQuery">
+        <label for="house-threshold" class="sr-only">Minimum presents</label>
+        <input
+          id="house-threshold"
+          v-model.number="houseThreshold"
+          type="number"
+          min="1"
+          class="query-input"
+          placeholder="Min presents..."
+        />
+        <button type="submit" class="btn btn-secondary btn-sm">Check</button>
+      </form>
+      <p v-if="houseQueryResult && houseQueryResult.error" class="query-error" aria-live="polite">
+        {{ houseQueryResult.error }}
+      </p>
+      <p v-else-if="houseQueryResult" class="query-result" aria-live="polite">
+        <strong>{{ houseQueryResult.houseCount }}</strong>
+        {{ houseQueryResult.houseCount === 1 ? 'house has' : 'houses have' }}
+        ≥ {{ houseQueryResult.minPresents }}
+        {{ houseQueryResult.minPresents === 1 ? 'present' : 'presents' }}
+      </p>
+    </section>
+
+    <!-- Progress bar -->
+    <section class="panel-section">
+      <div class="progress-header">
+        <span class="info-label">Progress</span>
+        <span class="progress-text"
+          >Step {{ simulation.currentStep }} of {{ simulation.totalSteps }}</span
+        >
+      </div>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" :style="progressStyle"></div>
       </div>
     </section>
 
@@ -262,6 +265,7 @@ export default {
   gap: var(--space-md);
   height: 100%;
   overflow-y: auto;
+  padding-right: var(--space-md);
 }
 
 .panel-section {
@@ -387,6 +391,7 @@ export default {
   cursor: pointer;
   transition: background-color var(--transition-fast);
   flex: 1;
+  box-shadow: var(--shadow-btn);
 }
 
 .btn:focus-visible {
@@ -451,6 +456,12 @@ export default {
 .query-result {
   font-size: var(--text-sm);
   color: var(--color-text);
+  padding: var(--space-xs) 0;
+}
+
+.query-error {
+  font-size: var(--text-sm);
+  color: var(--color-error);
   padding: var(--space-xs) 0;
 }
 
