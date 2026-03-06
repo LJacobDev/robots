@@ -16,7 +16,7 @@ All architecture and design decisions and tradeoff choices are my own, but I use
 
 I aimed to make this project to be reasonably engineered for its scope while also leaving it open to being able to be extended or adjusted for larger scale without needing significant refactoring or rewrites.
 
-I walked the boundary between pushing as many robust production-ready code quality and UX additions as I could while simultaneously keeping it at a scope where I would also be in full control of everything in the project. Every file and line has been vetted to ensure that everything here is here for a reason and is exactly what I wanted it to be.
+I walked the boundary between pushing as many robust production-ready code quality and UX additions as I could while simultaneously keeping it at a scope where I would also be in full control of everything in the project. Every file has been vetted to ensure that everything here is here for a reason and is exactly what I wanted it to be.
 
 ## Documents of Interest
 
