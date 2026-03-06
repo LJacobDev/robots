@@ -55,3 +55,5 @@ See [docs/spec.md](docs/spec.md) for full details on request/response shapes, st
 ## Project Goals and AI Involvement Disclosure
 
 See [docs/project-goals-ai-involvement-disclosure.md](docs/project-goals-ai-involvement-disclosure.md) for details on the intentions behind this project and in what ways AI was used to help create it.
+
+![Screenshot of the Simulation](image.png)
