@@ -422,27 +422,27 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
 
 ### 2.11 Zoom Controls
 
-- [ ] Add `+` and `−` buttons to a corner of the grid viewport (absolute positioned over the viewport)
-- [ ] Zoom state: `zoomLevel` in component data (default 1.0, min 0.25, max 3.0)
-- [ ] Apply zoom via `transform: scale()` on the grid container (combined with any existing transforms)
+- [x] Add `+` and `−` buttons to a corner of the grid viewport (absolute positioned over the viewport)
+- [x] Zoom state: `zoomLevel` in component data (default 1.0, min 0.25, max 3.0)
+- [x] Apply zoom via `transform: scale()` on the grid container (combined with any existing transforms)
 - [ ] Verify: clicking + zooms in, clicking − zooms out, grid remains scrollable at all zoom levels
 
 ### 2.12 Simulation View & Control Panel
 
-- [ ] Create `SimulationView.vue` component:
-  - Props: `simulationId` (number)
-  - Fetches simulation details via `getSimulation(id)` on mount and when `simulationId` changes (via `watch`)
-  - Owns: `simulation`, `robots`, `houses`, `totalPresents`, `houseQueryResult`, loading/error state
-  - Renders `SimulationGrid` (center) and `ControlPanel` (right sidebar)
-- [ ] Create `ControlPanel.vue` component:
+- [x] `App.vue` owns all simulation detail state (`simulation`, `robots`, `houses`, `summary`, loading/error flags, action state) and makes all API calls. It passes props down to `SimulationView` and `ControlPanel` as siblings.
+- [x] Create `SimulationView.vue` as a presentational component:
+  - Props: `simulation`, `robots`, `houses`, `loading`, `error`
+  - Renders loading state, error state with retry, or `SimulationGrid`
+  - Exposes `scrollToRobot()` via template ref for parent to call
+- [x] Create `ControlPanel.vue` component:
   - Props: `simulation`, `robots`, `totalPresents`, `houseQueryResult`, `isStepLoading`, `isRunLoading`
   - Emits: `step`, `run`, `check-houses` (with threshold N), `scroll-to-robot` (with robot ID)
-- [ ] Simulation info section: ID, status badge, move sequence (monospace)
-- [ ] Step / Run buttons: emit events to parent, disabled when completed or loading
+- [x] Simulation info section: ID, status badge, move sequence (monospace)
+- [x] Step / Run buttons: emit events to parent, disabled when completed or loading
   - Button text changes during loading: "Stepping..." / "Running..."
-- [ ] Progress bar: green bar width = `(currentStep / totalSteps) * 100%`, text label "Step X of Y"
+- [x] Progress bar: green bar width = `(currentStep / totalSteps) * 100%`, text label "Step X of Y"
   - Smooth width transition (respects prefers-reduced-motion)
-- [ ] Write component tests for `ControlPanel.vue`:
+- [x] Write component tests for `ControlPanel.vue`:
   - Renders simulation info: ID, status badge, move sequence
   - Renders robot list with name, color, and position for each robot
   - Step and Run buttons are enabled when status is 'created' or 'running'
@@ -455,53 +455,53 @@ The `GET /simulations/:id` endpoint (§4.8) becomes the frontend's primary data 
   - Houses query: threshold input validates >= 1
   - Houses query result displays when `houseQueryResult` prop is provided, empty when null
   - Clicking a robot name emits `scroll-to-robot` with the robot's ID
-- [ ] Verify: selecting a simulation loads its data, step/run buttons work, progress bar updates
+- [x] Verify: selecting a simulation loads its data, step/run buttons work, progress bar updates
 
 ### 2.13 Step & Run API Integration
 
 Both step and run follow the same pattern: perform the action, then refresh full state via `getSimulation(id)`. This keeps the frontend stateless — no local tracking of positions or present counts.
 
-- [ ] In `SimulationView.vue`, create a shared `refreshSimulation()` method:
+- [x] In `App.vue`, create a shared `refreshSimulation()` method:
   1. Call `getSimulation(id)` API
-  2. Update `simulation`, `robots`, `houses`, and `totalPresents` from response
+  2. Update `simulation`, `robots`, `houses`, and `summary` from response
   3. Clear `houseQueryResult` (snapshot invalidated by state change)
   4. Update the simulation's status in the sidebar list
-- [ ] Implement `step` handler:
+- [x] Implement `step` handler in `App.vue`:
   1. Set `isStepLoading` = true, disable buttons
   2. Call `stepSimulation(id)` API
   3. On success: call `refreshSimulation()`
   4. On error: display inline error message
   5. Set `isStepLoading` = false
-- [ ] Implement `run` handler:
+- [x] Implement `run` handler:
   1. Set `isRunLoading` = true, disable buttons
   2. Call `runSimulation(id)` API
   3. On success: call `refreshSimulation()`
   4. On error: display inline error message
   5. Set `isRunLoading` = false
-- [ ] Verify: stepping updates grid positions one at a time, running completes all steps, completed simulation disables buttons
+- [x] Verify: stepping updates grid positions one at a time, running completes all steps, completed simulation disables buttons
 
 ### 2.14 Statistics & Houses Query
 
-- [ ] In `ControlPanel.vue`, display:
+- [x] In `ControlPanel.vue`, display:
   - Robot count (from simulation.robotCount)
   - Total presents delivered (from `totalPresents` prop, sourced from `getSimulation` response summary)
-- [ ] Houses query section:
+- [x] Houses query section:
   - Number input for threshold N (validated >= 1)
   - "Check" button, emits `check-houses` with N
   - Result area shows "X houses have ≥ N presents" or empty when cleared
-- [ ] In `SimulationView.vue`, handle `check-houses` event:
+- [x] In `App.vue`, handle `check-houses` event:
   - Call `getHousesByThreshold(id, N)` API
   - Set `houseQueryResult` with the response
-- [ ] Verify: total presents updates after each step/run, houses query returns correct count, result clears after step/run
+- [x] Verify: total presents updates after each step/run, houses query returns correct count, result clears after step/run
 
 ### 2.15 Click-to-Scroll from Robot List
 
-- [ ] In `ControlPanel.vue`, robot list shows each robot's name, color swatch (small robot SVG or colored dot), and `(x, y)` position
-- [ ] Clicking a robot name emits `scroll-to-robot` with the robot's ID
-- [ ] In `SimulationView.vue`, handle `scroll-to-robot`:
-  - Find the robot SVG in the grid via `document.querySelector([data-robot-id="..."])`
-  - Call `.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })`
-- [ ] Verify: clicking a robot name scrolls the grid to center on that robot
+- [x] In `ControlPanel.vue`, robot list shows each robot's name, color swatch (small robot SVG or colored dot), and `(x, y)` position
+- [x] Clicking a robot name emits `scroll-to-robot` with the robot's ID
+- [x] In `App.vue`, handle `scroll-to-robot` by calling `this.$refs.simView.scrollToRobot(name)`, which delegates through `SimulationView` to `SimulationGrid`:
+  - Finds the robot SVG in the grid via `querySelector([data-robot-id="..."])`
+  - Calls `.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' })`
+- [x] Verify: clicking a robot name scrolls the grid to center on that robot
 
 ### 2.16 Loading, Empty, and Error States
 
@@ -590,4 +590,5 @@ All component and API client tests were written alongside their implementation s
 - [ ] Spec alignment: verify the running app matches every detail in spec.md §8–§16
 - [ ] Code review pass: JSDoc on all exported functions and components, consistent formatting, no dead code
 - [ ] README is complete and accurate
+- [ ] App has been checked on a fresh install on a unix based system and everything works, all scripts work, everything is tested
 - [ ] `docs/findings-decisions-actions.md` is up to date with any deviations discovered during implementation

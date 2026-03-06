@@ -29,13 +29,10 @@
         @click="$emit('select', sim.id)"
       >
         <div class="item-header">
-          <span class="item-id">#{{ sim.id }}</span>
-          <span
-            class="status-badge"
-            :class="'status-' + sim.status"
-          >{{ sim.status }}</span>
+          <span class="item-id">Sim-{{ sim.id }}</span>
+          <span class="status-badge" :class="'status-' + sim.status">{{ sim.status }}</span>
         </div>
-        <p class="item-moves" :title="sim.moveSequence">{{ sim.moveSequence }}</p>
+        <p class="item-created">{{ formatDate(sim.createdAt) }}</p>
       </button>
     </template>
   </div>
@@ -73,6 +70,25 @@ export default {
   },
 
   emits: ['select'],
+
+  methods: {
+    /**
+     * Formats an ISO timestamp into a short, readable date string.
+     *
+     * @param {string} iso - ISO 8601 timestamp
+     * @returns {string} Formatted date string
+     */
+    formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      return d.toLocaleString(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      });
+    },
+  },
 };
 </script>
 
@@ -95,7 +111,8 @@ export default {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
-  transition: background-color var(--transition-fast),
+  transition:
+    background-color var(--transition-fast),
     border-color var(--transition-fast);
 }
 
@@ -148,13 +165,9 @@ export default {
   background-color: var(--color-status-completed);
 }
 
-.item-moves {
-  font-family: var(--font-mono);
+.item-created {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   margin: 0;
 }
 

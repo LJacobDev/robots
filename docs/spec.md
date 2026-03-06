@@ -531,12 +531,18 @@ The left sidebar is always visible. The right sidebar appears only when a simula
 
 Visible when a simulation is selected. Contains, from top to bottom:
 
-1. **Simulation info** — ID, status badge (color-coded: created/running/completed), move sequence in monospace.
+1. **Simulation info** — ID, status badge (color-coded: created/running/completed), move sequence displayed as highlighted Unicode arrows with step tracking.
 2. **Step / Run controls** — "Step" and "Run" buttons side by side. Disabled when the simulation is completed or when an API call is in-flight.
 3. **Progress indicator** — Green progress bar showing `currentStep / totalSteps` as a percentage, with text label (e.g., "Step 3 of 6").
 4. **Statistics** — Robot count, total presents delivered (fetched from API on each step/run).
 5. **Houses query** — Number input for the threshold N, a "Check" button, and a result display area (e.g., "3 houses have ≥ 2 presents"). The result clears when any state change occurs (step or run).
 6. **Robot list** — Scrollable list showing each robot's name, color swatch, and current `(x, y)` position. Clicking a robot name scrolls the grid viewport to center on that robot's position.
+
+> **Design decision — move sequence display format (Unicode arrows):**
+> The project requirements specify `<`, `>`, `^`, `V` as the move instruction characters, and the API strictly adheres to this: input validation, storage, and processing all use these raw characters. However, in the UI the move sequence is displayed using Unicode arrows (`←`, `→`, `↑`, `↓`) instead. This is a presentation-layer transformation only — the mapping happens in a computed property at render time and does not alter any stored or transmitted data. The rationale: `<>^V` is a sensible data format but a poor display format — the mixed case, varying character widths, and ASCII appearance look rough in a polished interface. Unicode arrows are uniform in width, visually intuitive, and immediately readable. This separation of data format from display format is standard practice (analogous to storing dates as ISO 8601 but displaying them as "January 1, 2026").
+
+> **Design decision — move sequence step highlighting:**
+> Each character in the displayed move sequence is individually styled based on the current simulation step. Past moves (index < currentStep) are dimmed to a faded grey, the next move (index === currentStep) is highlighted in green, and future moves remain in the default text color. This gives the user immediate visual feedback about simulation progress directly in the move string itself, complementing the progress bar. When the simulation is completed, all moves show as past. The implementation uses one `<span>` per character — at typical sequence lengths (tens to hundreds of characters) this is negligible for DOM performance. Even at 1,000+ characters the rendering cost remains trivial compared to the grid's SVG markers.
 
 > **Design decision — "Check" button for houses query:**
 > The houses-by-threshold query is intentionally user-initiated rather than auto-fired on each step or run. This reflects its nature as an investigative tool — the user enters a specific threshold of interest and deliberately requests the count. Auto-firing on every state change would add API calls for data the user may not be looking at. The displayed result clears after a step or run to signal that it is a snapshot of a prior state, not a live counter. The word "Check" was chosen over "Query" (too technical) and "Update" (ambiguous — implies mutation).
@@ -735,42 +741,42 @@ The application targets WCAG 2.1 Level AA compliance:
 ### 15.1 Component Tree
 
 ```
-App.vue
-├── SimulationList.vue          (left sidebar)
-├── CreateSimulationModal.vue   (modal overlay)
-├── WelcomeScreen.vue           (center, when no sim selected)
-└── SimulationView.vue          (center + right sidebar, when sim selected)
-    ├── SimulationGrid.vue      (grid viewport)
-    │   ├── RobotMarker.vue     (SVG robot icon, per robot)
-    │   └── HouseMarker.vue     (SVG gift box icon, per house)
-    └── ControlPanel.vue        (right sidebar)
+App.vue                             (owns all state, handles all API calls)
+├── SimulationList.vue              (left sidebar)
+├── CreateSimulationModal.vue       (modal overlay)
+├── WelcomeScreen.vue               (center, when no sim selected)
+├── SimulationView.vue              (center, presentational wrapper)
+│   └── SimulationGrid.vue          (grid viewport)
+│       ├── RobotMarker.vue         (SVG robot icon, per robot)
+│       └── HouseMarker.vue         (SVG gift box icon, per house)
+└── ControlPanel.vue                (right sidebar)
 ```
 
 ### 15.2 Component Responsibilities
 
-| Component                   | Role                                                                                                             |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `App.vue`                   | Layout shell. Holds selected simulation ID. Fetches simulation list.                                             |
-| `SimulationList.vue`        | Renders the list of simulations. Emits selection events.                                                         |
-| `CreateSimulationModal.vue` | Form inputs, validation, arrow key capture, API call to create.                                                  |
-| `WelcomeScreen.vue`         | Shown when no simulation is selected. Prompt to create or select.                                                |
-| `SimulationView.vue`        | Orchestrates grid and control panel. Fetches simulation details. Manages API calls for step/run/presents/houses. |
-| `SimulationGrid.vue`        | Renders the grid background, robot markers, and house markers. Handles zoom and scroll.                          |
-| `RobotMarker.vue`           | Single SVG robot icon. Props: color, x, y, robot ID.                                                             |
-| `HouseMarker.vue`           | Single SVG gift box icon. Props: x, y.                                                                           |
-| `ControlPanel.vue`          | Step/Run buttons, progress bar, stats, houses query input, robot list with click-to-scroll.                      |
+| Component                   | Role                                                                                                                                                                                                       |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `App.vue`                   | Layout shell. Owns all application state (list, selected simulation detail, action flags). Handles all API calls (list, load, step, run, houses query). Passes props to children and handles their events. |
+| `SimulationList.vue`        | Renders the list of simulations. Emits selection events.                                                                                                                                                   |
+| `CreateSimulationModal.vue` | Form inputs, validation, arrow key capture, API call to create.                                                                                                                                            |
+| `WelcomeScreen.vue`         | Shown when no simulation is selected. Prompt to create or select.                                                                                                                                          |
+| `SimulationView.vue`        | Presentational wrapper for the center area. Displays loading, error (with retry), or SimulationGrid based on props. Exposes `scrollToRobot()` via ref.                                                     |
+| `SimulationGrid.vue`        | Renders the grid background, robot markers, and house markers. Handles zoom and scroll.                                                                                                                    |
+| `RobotMarker.vue`           | Single SVG robot icon. Props: color, x, y, robot ID.                                                                                                                                                       |
+| `HouseMarker.vue`           | Single SVG gift box icon. Props: x, y.                                                                                                                                                                     |
+| `ControlPanel.vue`          | Step/Run buttons, progress bar, stats, houses query input, robot list with click-to-scroll.                                                                                                                |
 
 ### 15.3 State Management
 
 There is no external state management library (Pinia, Vuex). State is managed via standard Vue Options API `data()` and `props`/`emits` between parent and child components.
 
-- **`App.vue`** owns: `selectedSimulationId`, `simulations[]` (the list).
-- **`SimulationView.vue`** owns: `simulation`, `robots[]`, `houses[]`, `totalPresents`, `houseQueryResult`, `loading` flags, `error` messages.
+- **`App.vue`** owns: `selectedSimulationId`, `simulations[]` (the list), `simulation`, `robots[]`, `houses[]`, `summary`, `houseQueryResult`, `loadingSimulation`, `simulationError`, `isStepLoading`, `isRunLoading`.
+- **`SimulationView.vue`** owns no state — it is purely presentational and receives all data as props.
 
-This is sufficient because the component tree is shallow (max 3 levels deep) and there is no cross-branch state sharing that would warrant a store.
+This is sufficient because the component tree is shallow (max 3 levels deep) and App.vue can pass props directly to both `SimulationView` and `ControlPanel` as siblings without any bridging patterns.
 
 > **Design decision — no Pinia/Vuex:**
-> State management libraries add value when state must be shared across deeply nested or sibling component trees. This application has a shallow hierarchy where the simulation view component naturally owns all simulation-related state and passes it down via props. Adding Pinia would introduce indirection (store files, action definitions, getter patterns) without solving any state-sharing problem that doesn't already have a simpler solution. If the component tree deepens significantly, Pinia could be introduced for specific state slices without refactoring existing components.
+> State management libraries add value when state must be shared across deeply nested or sibling component trees. This application has a shallow hierarchy where `App.vue` naturally owns all simulation-related state and passes it down via props to both `SimulationView` (center grid) and `ControlPanel` (right sidebar) as siblings. Adding Pinia would introduce indirection (store files, action definitions, getter patterns) without solving any state-sharing problem that doesn't already have a simpler solution. If the component tree deepens significantly, Pinia could be introduced for specific state slices without refactoring existing components.
 
 > **Design decision — no Vue Router:**
 > The application has exactly two visual states: "no simulation selected" and "simulation selected." This binary is managed by a single reactive variable (`selectedSimulationId`). Vue Router would add URL-based navigation, which enables deep linking and browser back/forward support — but also requires route definitions, navigation guards, and the router dependency. For this application's scope, the trade-off favors simplicity. If deep linking becomes important (e.g., sharing a URL to a specific simulation), Vue Router can be added and the `selectedSimulationId` moved to a route parameter with minimal refactoring.

@@ -1,8 +1,8 @@
 /**
  * Component tests for SimulationList.vue
  *
- * Verifies rendering of simulation items, status badges, truncated
- * move sequences, selection highlighting, loading skeletons, and
+ * Verifies rendering of simulation items, status badges, created
+ * timestamps, selection highlighting, loading skeletons, and
  * empty state messaging.
  */
 
@@ -12,9 +12,9 @@ import SimulationList from '../../components/SimulationList.vue';
 
 /** Sample simulations matching the shape returned by listSimulations() */
 const sampleSimulations = [
-  { id: 1, status: 'created', moveSequence: '^^VV<>', robotCount: 2 },
-  { id: 2, status: 'running', moveSequence: '^>V<^>V<', robotCount: 3 },
-  { id: 3, status: 'completed', moveSequence: '>>><<<^^^VVV', robotCount: 1 },
+  { id: 1, status: 'created', moveSequence: '^^VV<>', robotCount: 2, createdAt: '2026-03-06T10:30:00Z' },
+  { id: 2, status: 'running', moveSequence: '^>V<^>V<', robotCount: 3, createdAt: '2026-03-06T11:00:00Z' },
+  { id: 3, status: 'completed', moveSequence: '>>><<<^^^VVV', robotCount: 1, createdAt: '2026-03-06T11:30:00Z' },
 ];
 
 describe('SimulationList', () => {
@@ -27,15 +27,16 @@ describe('SimulationList', () => {
     expect(items).toHaveLength(3);
   });
 
-  it('displays simulation ID, status badge, and move sequence for each item', () => {
+  it('displays simulation ID, status badge, and created date for each item', () => {
     const wrapper = mount(SimulationList, {
       props: { simulations: sampleSimulations },
     });
 
     const firstItem = wrapper.findAll('.simulation-item')[0];
-    expect(firstItem.find('.item-id').text()).toBe('#1');
+    expect(firstItem.find('.item-id').text()).toBe('Sim-1');
     expect(firstItem.find('.status-badge').text()).toBe('created');
-    expect(firstItem.find('.item-moves').text()).toBe('^^VV<>');
+    expect(firstItem.find('.item-created').exists()).toBe(true);
+    expect(firstItem.find('.item-created').text()).not.toBe('');
   });
 
   it('emits select with the simulation ID when an item is clicked', async () => {
@@ -101,16 +102,15 @@ describe('SimulationList', () => {
     expect(badges[2].classes()).toContain('status-completed');
   });
 
-  it('truncates long move sequences with ellipsis via CSS class', () => {
-    const longSequence = '^'.repeat(200);
+  it('handles missing createdAt gracefully', () => {
     const wrapper = mount(SimulationList, {
       props: {
-        simulations: [{ id: 1, status: 'created', moveSequence: longSequence }],
+        simulations: [{ id: 1, status: 'created', moveSequence: '^^' }],
       },
     });
 
-    const moves = wrapper.find('.item-moves');
-    expect(moves.text()).toBe(longSequence);
-    expect(moves.attributes('title')).toBe(longSequence);
+    const created = wrapper.find('.item-created');
+    expect(created.exists()).toBe(true);
+    expect(created.text()).toBe('');
   });
 });

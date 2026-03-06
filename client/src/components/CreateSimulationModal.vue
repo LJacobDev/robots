@@ -1,10 +1,5 @@
 <template>
-  <div
-    v-if="visible"
-    class="modal-overlay"
-    @mousedown.self="cancel"
-    @keydown.esc="cancel"
-  >
+  <div v-if="visible" class="modal-overlay" @mousedown.self="cancel" @keydown.esc="cancel">
     <div
       ref="modal"
       class="modal-card"
@@ -37,7 +32,7 @@
             class="form-textarea"
             :class="{ 'input-error': moveSequenceError }"
             rows="4"
-            placeholder="Type ^V<> or press arrow keys..."
+            placeholder="Click here and press arrow keys or type <, V, >, ^ to create sequence"
             @keydown="handleKeydown"
           ></textarea>
           <p class="form-hint">
@@ -50,18 +45,8 @@
         <p v-if="apiError" class="api-error" role="alert">{{ apiError }}</p>
 
         <div class="modal-actions">
-          <button
-            type="button"
-            class="btn btn-secondary"
-            @click="cancel"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            :disabled="isSubmitting"
-          >
+          <button type="button" class="btn btn-secondary" @click="cancel">Cancel</button>
+          <button type="submit" class="btn btn-primary" :disabled="isSubmitting">
             {{ isSubmitting ? 'Creating...' : 'Create' }}
           </button>
         </div>
@@ -89,13 +74,7 @@ const ARROW_MAP = {
  * for editing and navigation purposes.
  * @type {Set<string>}
  */
-const ALLOWED_KEYS = new Set([
-  'Backspace',
-  'Delete',
-  'Tab',
-  'Home',
-  'End',
-]);
+const ALLOWED_KEYS = new Set(['Backspace', 'Delete', 'Tab', 'Home', 'End']);
 
 /**
  * Valid characters that can be typed directly into the move sequence.
@@ -246,10 +225,7 @@ export default {
 
       this.isSubmitting = true;
       try {
-        const data = await createSimulation(
-          this.robotCount,
-          this.moveSequence.trim(),
-        );
+        const data = await createSimulation(this.robotCount, this.moveSequence.trim());
         this.$emit('created', data);
         this.resetForm();
       } catch (err) {
