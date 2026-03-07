@@ -35,6 +35,12 @@ Open [http://localhost:3000](http://localhost:3000).
 5. Click a robot's name in the panel to scroll the grid to its position if it is currently out of view
 6. Create multiple simulations and switch between them in the left sidebar
 
+## Tests
+
+```bash
+npm run test        # runs all server and client tests
+```
+
 ## API
 
 All endpoints are under `/api/v1/simulations`. Responses are JSON.

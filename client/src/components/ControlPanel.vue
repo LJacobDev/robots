@@ -296,6 +296,7 @@ export default {
 }
 
 .info-label {
+  align-self: flex-start;
   color: var(--color-text-secondary);
   font-size: var(--text-xs);
 }
@@ -328,9 +329,13 @@ export default {
   font-family: var(--font-mono);
   font-size: 1.5rem;
   word-break: break-all;
-  max-width: 60%;
+  word-wrap: break-word;
+  max-width: 80%;
+  max-height: 120px;
+  overflow-y: auto;
   text-align: right;
   letter-spacing: 0.05em;
+  padding-right: 20px;
 }
 
 .move-past {
