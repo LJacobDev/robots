@@ -586,7 +586,7 @@ All component and API client tests were written alongside their implementation s
 - [x] Accessibility audit: run unlighthouse or manual keyboard/screen reader walkthrough
 - [x] Production build works: `npm run build && npm start` serves the full app
 - [x] Docker build works: `docker build` and `docker run` produce a working app
-- [ ] Spec alignment: verify the running app matches every detail in spec.md §8–§16
+- [x] Spec alignment: verify the running app matches every detail in spec.md §8–§16
 - [ ] Code review pass: JSDoc on all exported functions and components, consistent formatting, no dead code
 - [x] README is complete and accurate
 - [x] App has been checked on a fresh install on a unix based system and everything works, all scripts work, everything is tested

@@ -711,10 +711,10 @@ No toast notifications are used. Inline errors are more accessible (screen reade
 
 The application targets WCAG 2.1 Level AA compliance:
 
-- **Semantic HTML:** `<nav>`, `<main>`, `<aside>`, `<button>`, `<input>`, `<form>` used for their intended purposes. No `<div>` buttons.
+- **Semantic HTML:** `<main>`, `<aside>`, `<button>`, `<input>`, `<form>` used for their intended purposes. No `<div>` buttons.
 - **ARIA labels:** All interactive elements have accessible names. The grid viewport has `role="img"` with an `aria-label` describing the simulation state.
-- **Keyboard navigation:** Tab moves between major control groups (create button → simulation list → step button → run button → other controls). Arrow keys navigate within the simulation list. All interactive elements are reachable and operable without a mouse.
-- **Focus management:** `focus-visible` outlines on all focusable elements. When a modal opens, focus is trapped within it and returned to the trigger element on close.
+- **Keyboard navigation:** All interactive elements are reachable and operable without a mouse via Tab. *(Deferred: explicit Tab group ordering across control groups and arrow key navigation within the simulation list were intended but deferred for v1.)*
+- **Focus management:** `focus-visible` outlines on all focusable elements. *(Deferred: focus trapping within the modal and restoring focus to the trigger element on close were intended but deferred for v1. The modal uses `role="dialog"`, `aria-modal="true"`, and supports Escape/click-outside dismissal.)*
 - **Color contrast:** All text/background combinations meet WCAG AA contrast ratios (4.5:1 for normal text, 3:1 for large text).
 - **Live regions:** Status updates (step results, error messages) are announced to screen readers via `aria-live="polite"` regions.
 - **Reduced motion:** All animations and transitions respect `prefers-reduced-motion: reduce` (see §12.4).
