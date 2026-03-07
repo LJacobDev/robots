@@ -569,13 +569,13 @@ All component and API client tests were written alongside their implementation s
 
 ### 2.22 README.md
 
-- [ ] Write `README.md` per spec structure:
+- [x] Write `README.md` per spec structure:
   - **How to run it** — npm setup, Docker alternative, environment variables
   - **Things to try out** — example workflows (create simulation, step through it, run to completion, query houses)
   - **Description of the API** — summary table of endpoints with link to `docs/curl-examples.md` for details
   - **Reference** — link to `docs/spec.md` for full specification
-- [ ] Keep it clear, concise, and free of unnecessary clutter
-- [ ] Verify: a reader unfamiliar with the project can follow the instructions to run the app
+- [x] Keep it clear, concise, and free of unnecessary clutter
+- [x] Verify: a reader unfamiliar with the project can follow the instructions to run the app
 
 ### 2.23 Phase 2 Checkpoint Review
 
@@ -588,6 +588,6 @@ All component and API client tests were written alongside their implementation s
 - [x] Docker build works: `docker build` and `docker run` produce a working app
 - [ ] Spec alignment: verify the running app matches every detail in spec.md §8–§16
 - [ ] Code review pass: JSDoc on all exported functions and components, consistent formatting, no dead code
-- [ ] README is complete and accurate
-- [ ] App has been checked on a fresh install on a unix based system and everything works, all scripts work, everything is tested
+- [x] README is complete and accurate
+- [x] App has been checked on a fresh install on a unix based system and everything works, all scripts work, everything is tested
 - [x] `docs/findings-decisions-actions.md` is up to date with any deviations discovered during implementation

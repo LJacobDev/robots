@@ -32,7 +32,7 @@ Open [http://localhost:3000](http://localhost:3000).
 2. Click **Step** to advance one move at a time and watch robots move on the grid
 3. Click **Run All** to execute the remaining moves instantly
 4. Use the **houses query** in the right panel to ask "how many houses have at least N presents?"
-5. Click a robot's name in the panel to scroll the grid to its position
+5. Click a robot's name in the panel to scroll the grid to its position if it is currently out of view
 6. Create multiple simulations and switch between them in the left sidebar
 
 ## API
