@@ -52,6 +52,8 @@ All endpoints are under `/api/v1/simulations`. Responses are JSON.
 
 See [docs/spec.md](docs/spec.md) for full details on request/response shapes, status codes, and design decisions.
 
+See [docs/curl-examples.md](docs/curl-examples.md) for examples of curl commands that can be run against the API
+
 ## Project Goals and AI Involvement Disclosure
 
 See [docs/project-goals-ai-involvement-disclosure.md](docs/project-goals-ai-involvement-disclosure.md) for details on the intentions behind this project and in what ways AI was used to help create it.
