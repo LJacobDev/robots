@@ -28,7 +28,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Things to Try
 
-1. Click **+ New** to create a simulation — choose how many robots and enter a move sequence using arrow keys
+1. Click **+ New** to create a simulation — choose a number of robots and enter a move sequence using arrow keys
 2. Click **Step** to advance one move at a time and watch robots move on the grid
 3. Click **Run All** to execute the remaining moves instantly
 4. Use the **houses query** in the right panel to ask "how many houses have at least N presents?"
