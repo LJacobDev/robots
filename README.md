@@ -21,7 +21,7 @@ Requires Node.js 24+ (see `.nvmrc`).
 nvm use              # optional — sets the correct Node version
 npm install
 npm run build        # use npm run build:windows for windows systems
-npm start
+npm run start
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
