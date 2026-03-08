@@ -15,7 +15,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ### Without Docker
 
-Requires Node.js 24+ (see `.nvmrc`).
+Requires Node.js 24 (see `.nvmrc`).
 
 ```bash
 nvm use              # optional — sets the correct Node version
