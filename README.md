@@ -20,8 +20,8 @@ Requires Node.js 24 (see `.nvmrc`).
 ```bash
 nvm use              # optional — sets the correct Node version
 npm ci
-npm run build        # use npm run build:windows for windows systems
-npm run start
+npm run build        
+npm run start        # use npm run start:windows for windows systems
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
