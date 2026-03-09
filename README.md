@@ -19,7 +19,7 @@ Requires Node.js 24 (see `.nvmrc`).
 
 ```bash
 nvm use              # optional — sets the correct Node version
-npm install
+npm ci
 npm run build        # use npm run build:windows for windows systems
 npm run start
 ```
